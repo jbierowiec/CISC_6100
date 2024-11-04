@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>4x4 Sudoku</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>4x4 Sudoku</h1>
+      <div id="game-board">
+        {% for i in range(16) %}
+        <div class="cell" id="{{ i }}"></div>
+        {% endfor %}
+      </div>
+      <div id="status-message"></div>
+      <div class="button-container">
+        <button id="check-puzzle-btn">Check Puzzle</button>
+        <button id="restart-btn">Restart Game</button>
+      </div>
+    </div>
+
+    <!-- Modal for popup message -->
+    <div id="popup-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <p id="popup-message"></p>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+      $(document).ready(function() {
+        // Handles cell click and input
+        $('.cell').click(function() {
+          var position = parseInt($(this).attr('id'));
+          if ($(this).hasClass('prefilled')) {
+            alert("This cell is prefilled and cannot be changed.");
+          } else {
+            makeMove(position);
+          }
+        });
+
+        // Updates the board when the game is initialized or restarted
+        updateBoard({{ board | tojson }});
+
+        // Regenerate the board only when the restart button is clicked
+        $("#restart-btn").on('click', function() {
+          $.ajax({
+            url: '/restart',
+            method: 'POST',
+            contentType: 'application/json',
+            success: function(data) {
+              updateBoard(data.board);  // Update the board with new randomized values
+              $('#status-message').text('');  // Clear any previous messages
+            }
+          });
+        });
+
+        // Check puzzle button functionality
+        $("#check-puzzle-btn").on('click', function() {
+          checkPuzzle();
+        });
+
+        // Close the popup when the user clicks on the close button or outside the modal
+        $(".close-btn").click(function() {
+          $("#popup-modal").hide();
+        });
+
+        $(window).click(function(event) {
+          if ($(event.target).is("#popup-modal")) {
+            $("#popup-modal").hide();
+          }
+        });
+      });
+
+      // Function to update the board and apply styles to prefilled cells
+      function updateBoard(board) {
+        $(".cell").each(function(index) {
+          if (board[index] === 0) {
+            // Empty cells should not have the prefilled class and default to black
+            $(this).text('').removeClass('prefilled').css("color", "black");
+          } else {
+            // Prefilled cells have the prefilled class and are styled blue
+            $(this).text(board[index]).addClass('prefilled').css("color", "blue");
+          }
+        });
+      }
+
+      function makeMove(position) {
+        let value = prompt("Enter a number (1-4):");
+        if (value >= 1 && value <= 4) {
+          $.ajax({
+            url: '/make_move',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({'position': position, 'value': value}),
+            success: function(data) {
+              if (data.status === 'success') {
+                // Update the board with the new values
+                updateBoard(data.board);
+
+                // Ensure user-filled cells are black
+                $("#" + position).css("color", "black");
+              } else {
+                alert(data.message);
+              }
+            }
+          });
+        } else {
+          alert("Please enter a number between 1 and 4.");
+        }
+      }
+
+      // Function to check if the puzzle is solved
+      function checkPuzzle() {
+        $.ajax({
+          url: '/check_puzzle',
+          method: 'POST',
+          contentType: 'application/json',
+          success: function(data) {
+            if (data.solved) {
+              $('#popup-message').text('Sudoku Solved!');
+            } else {
+              $('#popup-message').text('The puzzle is incorrect or incomplete. Try again!');
+            }
+            $('#popup-modal').show();  // Show the modal
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
