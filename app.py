@@ -6,6 +6,7 @@ app = Flask(__name__)
 # Define the possible values for a 4x4 Sudoku and the board size
 BOARD_SIZE = 4
 NUM_PREFILLED_CELLS = 6  # Number of cells to pre-fill on each new board
+HISTORY = [] #A list of tuples. The last value is the coordinates of the last move made
 
 # Generate an initial empty board
 def generate_new_board():
@@ -95,6 +96,7 @@ def make_move():
     value = int(data['value'])
     
     row, col = divmod(position, BOARD_SIZE)
+    HISTORY.append((row, col))
     if 1 <= value <= BOARD_SIZE:
         current_board[row][col] = value
         return jsonify({'status': 'success', 'board': flatten_board(), 'winner': is_sudoku_solved(current_board)})
@@ -111,6 +113,15 @@ def restart():
 def check_puzzle():
     solved = is_sudoku_solved(current_board)
     return jsonify({'solved': solved})
+
+@app.route('/undo', methods=['POST'])
+def undo_move():
+    if(len(HISTORY) > 0):
+        square = HISTORY.pop()
+        current_board[square[0]][square[1]] = 0
+        return({'status': 'success', 'board': flatten_board()})
+    else:
+        return jsonify({'status': 'error', 'message': 'No move to undo'})
 
 def is_sudoku_solved(board):
     for row in board:

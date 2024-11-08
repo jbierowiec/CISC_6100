@@ -62,6 +62,19 @@ button:hover {
     background-color: #4caf49;
 }
 
+#timer {
+    font-size: 2.5em; /* Increase the font size */
+    text-align: center; /* Center the text */
+    margin: 20px auto; /* Add some margin */
+    padding: 10px; /* Add padding */
+    width: 200px; /* Set a width to help center */
+    border: 2px solid #333; /* Add a border */
+    border-radius: 10px; /* Round the corners */
+    background-color: #f0f0f0; /* Light background color */
+    color: #333; /* Text color */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+}
+
 #check-puzzle-btn {
     padding: 10px 20px;
     font-size: 18px;

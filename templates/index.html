@@ -10,6 +10,7 @@
     />
   </head>
   <body>
+    <div id="timer">00:00:00</div>
     <div class="container">
       <h1>4x4 Sudoku</h1>
       <div id="game-board">
@@ -21,6 +22,7 @@
       <div class="button-container">
         <button id="check-puzzle-btn">Check Puzzle</button>
         <button id="restart-btn">Restart Game</button>
+        <button id="undo-btn">Undo</button>
       </div>
     </div>
 
@@ -51,6 +53,7 @@
 
         // Regenerate the board only when the restart button is clicked
         $("#restart-btn").on('click', function() {
+          resetTimer()
           $.ajax({
             url: '/restart',
             method: 'POST',
@@ -65,6 +68,11 @@
         // Check puzzle button functionality
         $("#check-puzzle-btn").on('click', function() {
           checkPuzzle();
+        });
+
+        //Undo move button
+        $("#undo-btn").on('click', function(){
+          undoMove();
         });
 
         // Close the popup when the user clicks on the close button or outside the modal
@@ -133,6 +141,68 @@
           }
         });
       }
+
+      function undoMove() {
+        $.ajax({
+          url: '/undo',
+          method: 'POST',
+          contentType: 'application/json',
+          success: function(data) {
+              if (data.status === 'success') {
+                // Update the board with the new values
+                updateBoard(data.board);
+
+                // Ensure user-filled cells are black
+                $("#" + position).css("color", "black");
+              } else {
+                alert(data.message);
+              }
+            }
+        })
+      }
+      //Timer functions
+      let timerInterval;
+      let seconds = 0;
+
+      function startTimer() {
+          clearInterval(timerInterval);
+          timerInterval = setInterval(() => {
+              seconds++;
+              document.getElementById('timer').textContent = formatTime(seconds);
+          }, 1000);
+      }
+
+      function stopTimer() {
+        clearInterval(timerInterval);
+      }
+
+      function resetTimer() {
+          clearInterval(timerInterval);
+          seconds = 0;
+          document.getElementById('timer').textContent = formatTime(seconds);
+          startTimer();  // Optionally restart the timer
+      }
+
+      function formatTime(totalSeconds) {
+          const hours = Math.floor(totalSeconds / 3600);
+          const minutes = Math.floor((totalSeconds % 3600) / 60);
+          const seconds = totalSeconds % 60;
+          return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      }
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            // Stop the timer when the tab is not active
+            stopTimer();
+        } else {
+            // Resume the timer when the tab becomes active again
+            startTimer();
+        }
+      });
+
+      window.onload = () => {
+            startTimer();
+      };
     </script>
   </body>
 </html>
