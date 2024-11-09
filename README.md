@@ -75,4 +75,7 @@ To start the backend and frontend servers, follow these steps:
 ## Notes
 - The games are stored in `games.json` and contain information on each game's grid layout, solutions, and difficulty level.
 - Currently, selecting the correct puzzle on the frontend may require manually matching the backend puzzle. This neeeds to improved in future updates.
-- We now need to try to a few (5 probably) 9x9 sudoku games (3 easy, 1 medium, 1 hard) (to test if the difficulty levels will work if we switch toggles between difficulty levels and size of grid). We also need to adjust the current functionality that works for 4x4 grids to now work for 9x9 grids, and make sure that when 9x9 grids are selected, a 9x9 grid is displayed, replacing the 4x4 grid and vice versa. 
+- We now need to try to a few (5 probably) 9x9 sudoku games (3 easy, 1 medium, 1 hard) (to test if the difficulty levels will work if we switch toggles between difficulty levels and size of grid). We also need to adjust the current functionality that works for 4x4 grids to now work for 9x9 grids, and make sure that when 9x9 grids are selected, a 9x9 grid is displayed, replacing the 4x4 grid and vice versa.
+- The Undo button functionality needs to be fixed, because it seems to not work in the frontend and backend setup.
+- We need to implement buttons for: Generate Random Hint, Generate Specific Hint, Set Note
+- Once evrything is fixed, implemented and the whole system is working, we can then add more functionality if needed, and we need to think about setting up a login system for individual users, other potential pages, like a settings page, etc.
