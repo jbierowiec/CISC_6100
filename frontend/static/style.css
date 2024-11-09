@@ -1,0 +1,156 @@
+/* Center the entire layout */
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    background-color: #f3f4f6;
+    margin: 0;
+}
+
+/* Title styling */
+h1 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Top controls container for inline layout */
+.top-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+/* Bottom controls container for inline layout */
+.bottom-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+/* Timer styling */
+#timer {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #444;
+    background-color: #e0e7ff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-align: center;
+    width: 100px;
+}
+
+/* Difficulty dropdown and buttons */
+#difficulty, button {
+    font-size: 1em;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+/* Button styling */
+button {
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+/* Button colors */
+button#theme-toggle { background-color: #787aeb; color: #fff; }
+button:nth-of-type(1) { background-color: #38bdf8; color: #fff; } /* Check Solution */
+button:nth-of-type(2) { background-color: #4ade80; color: #fff; } /* New Game */
+button:nth-of-type(3) { background-color: #f87171; color: #fff; } /* Undo */
+
+/* Dark mode button colors */
+body.dark-mode button#theme-toggle { background-color: #4c51bf; color: #ddd; }
+body.dark-mode button:nth-of-type(1) { background-color: #2b6cb0; color: #ddd; }
+body.dark-mode button:nth-of-type(2) { background-color: #2f855a; color: #ddd; }
+body.dark-mode button:nth-of-type(3) { background-color: #c53030; color: #ddd; }
+
+
+/* Grid styling */
+.grid-container {
+    display: grid;
+    grid-gap: 5px;
+    margin-bottom: 20px;
+    justify-content: center;
+}
+
+.cell {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 1.2em;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.cell:disabled {
+    background-color: #e2e8f0;
+    color: blue;
+}
+
+body.light-mode {
+    background-color: #f3f4f6;
+    color: #333;
+}
+
+body.dark-mode {
+    background-color: #1a1a2e;
+    color: #f0f0f0;
+}
+
+h1 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+body.dark-mode h1 {
+    font-size: 2em;
+    color: #f0f0f0;
+    margin-bottom: 10px;
+}
+
+#timer {
+    background-color: #e0e7ff;
+    color: #444;
+}
+
+body.dark-mode #timer {
+    background-color: #333;
+    color: #f0f0f0;
+}
+
+#difficulty {
+    background-color: #4ade80;
+    color: #fff;
+}
+
+#difficulty:hover {
+    opacity: 0.9;
+}
+
+
+body.dark-mode #difficulty {
+    background-color: #2f855a;
+    color: #ddd;
+}
+
+.grid-container .cell {
+    color: #333;
+    background-color: #fff;
+}
+
+body.dark-mode .grid-container .cell {
+    color: #ddd;
+    background-color: #333;
+}

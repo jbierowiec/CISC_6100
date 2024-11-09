@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Sudoku Game</title>
+    <script>
+      let currentBoard = []; // Store the flattened board received from the backend
+      let moveHistory = []; // Stack to store the history of moves on the frontend
+      let gameSolved = false; // Flag to track if the game is solved
+
+      async function checkSolution() {
+        const solution = [];
+
+        for (let i = 0; i < 4; i++) {
+          const row = [];
+          for (let j = 0; j < 4; j++) {
+            const cell = document.querySelector(
+              `.cell[data-row="${i}"][data-col="${j}"]`
+            );
+            if (cell) {
+              const value = parseInt(cell.value) || 0;
+              row.push(value);
+            } else {
+              row.push(0);
+            }
+          }
+          solution.push(row);
+        }
+
+        const response = await fetch("/check_solution", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ solution: solution }),
+        });
+
+        const result = await response.json();
+        /*
+        alert(
+          result.status === "correct"
+            ? "Sudoku has been solved!"
+            : "Incorrect solution."
+        );
+        */
+        if (result.status === "correct") {
+          alert("Sudoku has been solved!");
+          stopTimer(); // Stop the timer when the solution is correct
+          gameSolved = true; // Set the flag to indicate the game is solved
+        } else {
+          alert("Incorrect solution.");
+        }
+      }
+
+      async function newGame() {
+        const difficulty = document.getElementById("difficulty").value;
+
+        const response = await fetch(`/new_game?difficulty=${difficulty}`);
+
+        const { puzzle } = await response.json();
+        updateGrid(puzzle);
+        resetTimer();
+      }
+
+      function updateGrid(puzzle) {
+        document.querySelectorAll(".cell").forEach((cell, i) => {
+          const row = Math.floor(i / 4);
+          const col = i % 4;
+          const value = puzzle[row][col];
+          cell.value = value || "";
+          cell.disabled = !!value; // Disable pre-filled cells
+          cell.style.color = value ? "blue" : "black"; // Blue for pre-filled, black for user input
+        });
+
+        moveHistory = [];
+      }
+
+      /* 
+        This is the code for the undo button and keeping track of history functionality. Currently it does not work properly
+      */
+
+      // Function to track a move and save it to the backend
+      function trackMove(row, col, newValue) {
+        $.ajax({
+          url: "/track_move",
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({ row: row, col: col, value: newValue }),
+          success: function (response) {
+            if (response.status === "success") {
+              console.log("Move tracked successfully.");
+            }
+          },
+        });
+      }
+
+      // Attach event listener to each cell to track user inputs
+      document.querySelectorAll(".cell").forEach((cell) => {
+        cell.addEventListener("input", (event) => {
+          const row = parseInt(cell.getAttribute("data-row"));
+          const col = parseInt(cell.getAttribute("data-col"));
+          const newValue = parseInt(event.target.value) || "";
+
+          // Track the input in backend history
+          trackMove(row, col, newValue);
+
+          // Debug: Log the move being tracked
+          console.log("Tracking move:", { row, col, newValue });
+        });
+      });
+
+      // Function to undo the last move
+      function undoMove() {
+        $.ajax({
+          url: "/undo",
+          method: "POST",
+          contentType: "application/json",
+          success: function (data) {
+            if (data.status === "success") {
+              // Update the board with the reverted state
+              updateBoard(data.board);
+            } else {
+              alert(data.message);
+            }
+          },
+        });
+      }
+
+      // Function to update the board on the frontend with new values
+      function updateBoard(flattenedBoard) {
+        document.querySelectorAll(".cell").forEach((cell, index) => {
+          const row = Math.floor(index / 4);
+          const col = index % 4;
+          const value = flattenedBoard[index];
+          cell.value = value !== 0 ? value : ""; // Display empty for 0 values
+        });
+      }
+
+      // Timer Functions Setup
+      let timerInterval;
+      let seconds = 0;
+
+      // Function to start the timer
+      function startTimer() {
+        clearInterval(timerInterval); // clears any existing timer
+        timerInterval = setInterval(() => {
+          seconds++;
+          document.getElementById("timer").textContent = formatTime(seconds);
+        }, 1000);
+      }
+
+      // Function to stop the timer
+      function stopTimer() {
+        clearInterval(timerInterval);
+      }
+
+      // Function to reset the timer
+      function resetTimer() {
+        clearInterval(timerInterval);
+        seconds = 0;
+        document.getElementById("timer").textContent = formatTime(seconds);
+        gameSolved = false; // Reset the solved flag when a new game starts
+        startTimer();
+      }
+
+      // Helper function to format time in HH:MM:SS format
+      function formatTime(totalSeconds) {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+          2,
+          "0"
+        )}:${String(seconds).padStart(2, "0")}`;
+      }
+
+      // Event listener to pause/resume timer on tab visibility change
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          // Stop the timer when the tab is not active
+          stopTimer();
+        } else if (!gameSolved) {
+          // Resume the timer when the tab becomes active again
+          startTimer();
+        }
+      });
+
+      // Light & Dark Mode Button Functionality
+      function toggleTheme() {
+        const body = document.body;
+        const themeToggleButton = document.getElementById("theme-toggle");
+
+        // Toggle the dark-mode class on the body
+        body.classList.toggle("dark-mode");
+
+        // Update the button text based on the current theme
+        if (body.classList.contains("dark-mode")) {
+          themeToggleButton.textContent = "Light Mode";
+          localStorage.setItem("theme", "dark");
+        } else {
+          themeToggleButton.textContent = "Dark Mode";
+          localStorage.setItem("theme", "light");
+        }
+      }
+
+      // Start the timer when the window loads
+      window.onload = () => {
+        if (localStorage.getItem("theme") === "dark") {
+          document.body.classList.add("dark-mode");
+          document.getElementById("theme-toggle").textContent = "Light Mode";
+        } else {
+          document.body.classList.add("light-mode");
+          document.getElementById("theme-toggle").textContent = "Dark Mode";
+        }
+        startTimer();
+      };
+    </script>
+  </head>
+  <body onload="updateGrid({{ puzzle|tojson }});">
+    <h1>4x4 Sudoku Game</h1>
+
+    <!-- Top controls: Timer, Difficulty, and Dark/Light Mode -->
+    <div class="top-controls">
+      <div id="timer">00:00:00</div>
+
+      <label for="difficulty">Difficulty:</label>
+      <select id="difficulty">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+
+      <button onclick="toggleTheme()" id="theme-toggle">Dark Mode</button>
+    </div>
+
+    <!-- Displaying the board (4x4) grid -->
+    <div
+      style="display: grid; grid-template-columns: repeat(4, 50px); gap: 5px"
+    >
+      {% for row_index in range(4) %} {% for col_index in range(4) %} <input
+      type="text" class="cell" data-row="{{ row_index }}" data-col="{{ col_index
+      }}" value="{{ puzzle[row_index][col_index] if puzzle[row_index][col_index]
+      != 0 else '' }}" {{ 'disabled' if puzzle[row_index][col_index] != 0 }}
+      style="width: 50px; height: 50px; text-align: center;"> {% endfor %} {%
+      endfor %}
+    </div>
+
+    <!-- Bottom controls: Check Solution, New Game, Undo -->
+    <div class="bottom-controls">
+      <button onclick="checkSolution()">Check solution</button>
+      <button onclick="newGame()">Create new game</button>
+      <button onclick="undoMove()">Undo</button>
+    </div>
+  </body>
+</html>
