@@ -20,9 +20,17 @@
       </div>
       <div id="status-message"></div>
       <div class="button-container">
-        <button id="check-puzzle-btn">Check Puzzle</button>
+        <button id="check-puzzle-btn">Check Puzzle</button> 
         <button id="restart-btn">Restart Game</button>
         <button id="undo-btn">Undo</button>
+        <div class = "puzzle-size-dropdown">  <!-- specifies dropdown div -->
+          <button id="dropdown-btn"> Change Puzzle Size</button>
+          <div class="puzzle-size-contents"> 
+            <a href="#" onclick="submitForm(4)">4x4</a>
+            <a href="#" onclick="submitForm(9)">9x9</a>
+            <a href="#" onclick="submitForm(16)">16x16</a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -85,7 +93,7 @@
             $("#popup-modal").hide();
           }
         });
-      });
+       });
 
       // Function to update the board and apply styles to prefilled cells
       function updateBoard(board) {

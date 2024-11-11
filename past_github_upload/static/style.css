@@ -11,12 +11,40 @@
     color: blue;
 }
 
-
 h1 {
     font-size: 24px;
     margin-bottom: 20px;
 }
 
+  /* display size options when button is hovered */
+  .puzzle-size-dropdown:hover .puzzle-size-contents {
+    display: block;
+    background-color:rgba(139, 177, 131, 0.1)
+}
+
+  /* change background color of highlighted sizes */
+  .puzzle-size-dropdown a:hover{
+    background-color:rgb(208, 207, 207);
+}
+  /* style the size options text */
+  .puzzle-size-dropdown a{
+      display: block;
+      color: black;
+      text-decoration: none;
+      padding: 10px 10px;
+      font-size: 18px;
+  }
+  
+  /* format div containing the size options */
+  .puzzle-size-contents{
+      display: none;
+      position: absolute;
+      background-color: rgb(175, 163, 163);
+      min-width: 200px;
+      box-shadow: 0px 8px 16px;
+      border-radius: 5px;
+  }
+  
 #game-board {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -59,8 +87,9 @@ button {
 }
 
 button:hover {
-    background-color: #4caf49;
+    background-color: #83a481;
 }
+
 
 #timer {
     font-size: 2.5em; /* Increase the font size */
@@ -103,6 +132,7 @@ button:hover {
     background-color: #4caf49;
 }
 
+
 .cell:hover {
     background-color: #e0e0e0;
 }
@@ -110,3 +140,5 @@ button:hover {
 .winner, .winner:hover {
     background-color: #7fff00;
 }
+
+
