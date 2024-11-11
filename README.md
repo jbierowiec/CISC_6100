@@ -79,3 +79,14 @@ To start the backend and frontend servers, follow these steps:
 - The Undo button functionality needs to be fixed, because it seems to not work in the frontend and backend setup.
 - We need to implement buttons for: Generate Random Hint, Generate Specific Hint, Set Note
 - Once evrything is fixed, implemented and the whole system is working, we can then add more functionality if needed, and we need to think about setting up a login system for individual users, other potential pages, like a settings page, etc.
+
+## To Do List
+1. Implement Undo Button (take away one number -> the number that the user has inputted)
+2. Implement Undo Until Correct Buton (take away all wrong numbers until it reaches the cells with only correct and preset values)
+3. Implement Generate Random Hint Button (user clicks the button at anytime, and a empty cell is filled with a value from the solutions part of the JSON file)
+4. Implement Generate Specific Hint Button (user clicks on an empty cell, then the user clicks on the Get Specific Hint Button and a value is filled in from the solutions part of the JSON file)
+5. Implement Set Note Button (user clicks on this button, can fill a cell with as many values as they want, they should be able to save their inputs and a cell should have those values in a cell in a small font)
+6. Implement Show Solution Button (user does not want to solve the Sudoku game anymore and want to see the solution)
+7. Create a home page where the user first clicks on a size and difficulty and then they are redirected to the game (don't just have one game page with all th buttons and user choices there)
+8. Create a login system so that the user can log in to the game (be separated from individual users)
+9. Make sure Generate New Game button reloads the Backend to include that specifc game so that the Check Solution Button will work
