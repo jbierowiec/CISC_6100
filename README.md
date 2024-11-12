@@ -10,6 +10,39 @@ The Sudoku Project is a web-based application that provides users with a customi
 
 ---
 
+## Project Structure
+
+```plaintext
+├── backend
+│   ├── backend
+│   │   ├── __pycache__/
+│   │   ├── __init__.py
+│   │   ├── asgi.py
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   ├── wsgi.py
+│   ├── sudoku_app
+│   │   ├── __pycache__/
+│   │   ├── migrations/
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── models.py
+│   │   ├── tests.py
+│   │   ├── urls.py
+│   │   ├── views.py
+│   ├── db.sqlite3
+│   └── manage.py
+├── frontend
+│   ├── __pycache__/
+│   ├── static
+│   │   └── style.css
+│   ├── templates
+│   │   └── index.html
+├── app.py
+└── games.json
+```
+
 ## Features
 
 ### Timer Functionality
