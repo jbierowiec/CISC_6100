@@ -107,19 +107,43 @@ To start the backend and frontend servers, follow these steps:
 
 ## Notes
 - The games are stored in `games.json` and contain information on each game's grid layout, solutions, and difficulty level.
-- Currently, selecting the correct puzzle on the frontend may require manually matching the backend puzzle. This neeeds to improved in future updates.
-- We now need to try to a few (5 probably) 9x9 sudoku games (3 easy, 1 medium, 1 hard) (to test if the difficulty levels will work if we switch toggles between difficulty levels and size of grid). We also need to adjust the current functionality that works for 4x4 grids to now work for 9x9 grids, and make sure that when 9x9 grids are selected, a 9x9 grid is displayed, replacing the 4x4 grid and vice versa.
-- The Undo button functionality needs to be fixed, because it seems to not work in the frontend and backend setup.
-- We need to implement buttons for: Generate Random Hint, Generate Specific Hint, Set Note
+- Currently, selecting the correct puzzle on the frontend may require manually matching the backend puzzle. This neeeds to fixed for proper frontend to backend communication.
+- We now need to try to a few (7 probably) 9x9 sudoku games (3 easy, 2 medium, 2 hard) (to test if the difficulty levels will work if we switch toggles between difficulty levels and size of grid). We also need to adjust the current functionality that works for 4x4 grids to now work for 9x9 grids, and make sure that when 9x9 grids are selected, a 9x9 grid is displayed, replacing the 4x4 grid and vice versa.
+- We need to implement buttons for: Undo Until Correct, Generate Random Hint, Generate Specific Hint, Set Note Mode Off/On, Show Solution
 - Once evrything is fixed, implemented and the whole system is working, we can then add more functionality if needed, and we need to think about setting up a login system for individual users, other potential pages, like a settings page, etc.
 
 ## To Do List
-1. Implement Undo Button (take away one number -> the number that the user has inputted)
-2. Implement Undo Until Correct Buton (take away all wrong numbers until it reaches the cells with only correct and preset values)
-3. Implement Generate Random Hint Button (user clicks the button at anytime, and a empty cell is filled with a value from the solutions part of the JSON file)
-4. Implement Generate Specific Hint Button (user clicks on an empty cell, then the user clicks on the Get Specific Hint Button and a value is filled in from the solutions part of the JSON file)
-5. Implement Set Note Button (user clicks on this button, can fill a cell with as many values as they want, they should be able to save their inputs and a cell should have those values in a cell in a small font)
-6. Implement Show Solution Button (user does not want to solve the Sudoku game anymore and want to see the solution)
-7. Create a home page where the user first clicks on a size and difficulty and then they are redirected to the game (don't just have one game page with all th buttons and user choices there)
-8. Create a login system so that the user can log in to the game (be separated from individual users)
-9. Make sure Generate New Game button reloads the Backend to include that specifc game so that the Check Solution Button will work
+~~1. Light/Dark Mode Toggle Implemented~~
+~~2. Timer Implemented~~
+~~3. Generate New Game Button Implemented~~
+~~4. Check Solution Button Implemented~~
+~~5. Undo Button Implemented~~
+~~6. Number Buttons Implemented~~
+~~7. Difficulty Dropdown Button Implemented~~
+~~8. Entering a number that is duplicated in the same row/column or 2x2 square warning~~
+9. Undo Until Correct Button
+10. Generate Random Hint Button
+11. Generate Specific Hint Button
+12. Set Note Mode Off/On Button
+13. Show Solution Button
+14. Database with 9x9 grids
+15. Sudoku Board Size Dropdown Button
+16. Display of 9x9 Sudoku Grid on Screen
+17. Generalized Buttons to work for any Grid Size
+18. Home Page
+19. Login System
+20. Proper Backend Communication with Frontend
+
+## Description of Implementations
+- Undo Until Correct Buton (take away all wrong numbers until it reaches the cells with only correct and preset values)
+- Generate Random Hint Button (user clicks the button at anytime, and a empty cell is filled with a value from the solutions part of the JSON file)
+- Generate Specific Hint Button (user clicks on an empty cell, then the user clicks on the Get Specific Hint Button and a value is filled in from the solutions part of the JSON file)
+- Set Note Button (user clicks on this button, can fill a cell with 4 values for 4x4 sudoku or 9 values for 9x9 sudoku. Those values should all be within a single cell and should have a 2x2 layout for 4x4 sudoku or a 3x3 layout for 9x9 sudoku. If a user inputs a value in a cell that is in the same row or column of the noted cell, then the noted cell should pop the value that was noted, since the value is now used in a different cell. The values inside of the note cell should have those values in a cell in a small font)
+- Show Solution Button (user does not want to solve the Sudoku game anymore and want to see the solution)
+- Include 3 easy 9x9 sudoku games, 2 medium 9x9 sudoku games, 2 hard 9x9 sudoku games in the JSON file (can be changed later on to be a sqllite3.db)
+- Dropdown button for the user to choose the sudoku game size, and for the corresponding grid to display and for the buttons to pull the properly sized games from the JSON file Sudoku game stored games
+- Display of the 9x9 sudoku board game and vice versa 4x4 grid based on the user's choice of size from the Dropdown Button
+- Make sure the functions become generalized to work for a 4x4 and a 9x9 grid
+- Home page where the user first clicks on a size and difficulty and then they are redirected to the game (don't just have one game page with all th buttons and user choices there)
+- Login system so that the user can log in to the game (be separated from individual users)
+- Generate New Game button reloads the Backend to include that specifc game so that the Check Solution Button will work along with all other buttons
