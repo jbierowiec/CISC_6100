@@ -14,10 +14,6 @@ BACKEND_URL = "http://127.0.0.1:8000/sudoku"
 with open('games.json') as f:
     games_data = json.load(f)["sudoku_games"]
 
-def flatten_board():
-    """Flatten the board to a single list to send to the frontend for rendering."""
-    return [item for row in current_board for item in row]
-
 @app.route('/')
 def index():
     # Fetch the current puzzle from the backend
@@ -25,40 +21,6 @@ def index():
     global current_board
     current_board = puzzle["puzzle"]  # Initialize the current board with the puzzle
     return render_template('index.html', puzzle=puzzle["puzzle"])
-
-@app.route('/undo', methods=['POST'])
-def undo_move():
-    print("Attempting to undo. Current move history:", HISTORY)  # Debug
-
-    if HISTORY:
-        # Pop the last move from history
-        last_move = HISTORY.pop()
-        row, col, previous_value = last_move
-        current_board[row][col] = previous_value  # Revert the board cell to previous value
-        return jsonify({'status': 'success', 'board': flatten_board()})
-    else:
-        return jsonify({'status': 'error', 'message': 'No moves to undo'})
-
-@app.route('/track_move', methods=['POST'])
-def track_move():
-    data = request.json
-    row = data['row']
-    col = data['col']
-    new_value = data['value']
-    previous_value = current_board[row][col]
-
-    # Only track moves if the new value is different
-    if previous_value != new_value:
-        # Store the move in history
-        HISTORY.append((row, col, previous_value))
-        # Update the board with the new value
-        current_board[row][col] = new_value
-
-    # Debug: Print the history to verify tracking
-    print("Current move history:", HISTORY)
-
-    return jsonify({'status': 'success'})
-
 
 @app.route('/check_solution', methods=['POST'])
 def check_solution():

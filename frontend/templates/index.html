@@ -9,10 +9,247 @@
     />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>Sudoku Game</title>
+  </head>
+  <body onload="updateGrid({{ puzzle|tojson }});">
+    <h1>4x4 Sudoku Game</h1>
+
+    <!-- Top controls: Timer, Difficulty, and Dark/Light Mode -->
+    <div class="top-controls">
+      <div id="timer">00:00:00</div>
+
+      <label for="difficulty">Difficulty:</label>
+      <select id="difficulty" onchange="newGame()">
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+
+      <button onclick="toggleTheme()" id="theme-toggle">Dark Mode</button>
+    </div>
+
+    <!-- Displaying the board (4x4) grid -->
+
+    <div
+      style="display: grid; grid-template-columns: repeat(4, 50px); gap: 5px"
+    >
+      {% for row_index in range(4) %} {% for col_index in range(4) %} <input
+      type="text" class="cell" data-row="{{ row_index }}" data-col="{{ col_index
+      }}" value="{{ puzzle[row_index][col_index] if puzzle[row_index][col_index]
+      != 0 else '' }}" {{ 'disabled' if puzzle[row_index][col_index] != 0 }}
+      style="width: 50px; height: 50px; text-align: center;"> {% endfor %} {%
+      endfor %}
+      <div class="note-container"></div>
+    </div>
+
+    <!-- maxlength="1" oninput="validateInput(this)"  -->
+
+    <!-- Number input buttons -->
+    <div class="number-controls">
+      <button onclick="selectNumber(1)">1</button>
+      <button onclick="selectNumber(2)">2</button>
+      <button onclick="selectNumber(3)">3</button>
+      <button onclick="selectNumber(4)">4</button>
+    </div>
+
+    <!-- Bottom controls: Check Solution, New Game, Undo -->
+    <div class="bottom-controls">
+      <button onclick="checkSolution()">Check solution</button>
+      <button onclick="newGame()">Create new game</button>
+      <button onclick="undoMove()">Undo</button>
+    </div>
+
     <script>
-      let currentBoard = []; // Store the flattened board received from the backend
-      let moveHistory = []; // Stack to store the history of moves on the frontend
+      // Function to undo the last move
+      function undoMove() {
+        if (moveHistory.length === 0) {
+          alert("No moves to undo.");
+          return;
+        }
+
+        // Get the last move from the history
+        const lastMove = moveHistory.pop();
+
+        // Find the cell and set it back to empty
+        const cell = document.querySelector(
+          `.cell[data-row="${lastMove.row}"][data-col="${lastMove.col}"]`
+        );
+        cell.value = lastMove.previousValue || ""; // Clear the cell's value
+
+        validateBoard(); // Re-validate the board after undoing the move
+      }
+
+      document.querySelectorAll(".cell").forEach((cell) => {
+        // Listen for direct keyboard input in each cell
+        cell.addEventListener("input", () => {
+          const row = cell.dataset.row;
+          const col = cell.dataset.col;
+          const newValue = cell.value;
+
+          // Only record if the input is a valid number between 1 and 4
+          if (["1", "2", "3", "4"].includes(newValue)) {
+            // Get the previous value before updating it
+            const previousValue = cell.dataset.previousValue || "";
+
+            // Record the move
+            moveHistory.push({
+              row: row,
+              col: col,
+              previousValue: previousValue, // Store the previous value
+              newValue: newValue,
+            });
+
+            // Update `previousValue` data attribute to the current value for next time
+            cell.dataset.previousValue = newValue;
+
+            validateBoard(); // Re-validate the board after each input
+          } else {
+            cell.value = ""; // Clear invalid input
+            alert("Only values 1, 2, 3, or 4 are allowed.");
+          }
+        });
+      });
+
+      document.querySelectorAll(".cell").forEach((cell) => {
+        // Add event listener to validate the board after each input
+        cell.addEventListener("input", () => {
+          validateBoard(); // Run validation after each input
+        });
+      });
+
+      function validateBoard() {
+        // Clear previous highlights
+        document.querySelectorAll(".cell").forEach((cell) => {
+          cell.style.backgroundColor = ""; // Reset background color
+        });
+
+        // Check for duplicates in rows, columns, and 2x2 squares
+        for (let row = 0; row < 4; row++) {
+          for (let col = 0; col < 4; col++) {
+            const cell = document.querySelector(
+              `.cell[data-row="${row}"][data-col="${col}"]`
+            );
+            const value = cell.value;
+
+            if (value) {
+              if (
+                hasDuplicateInRow(row, col, value) ||
+                hasDuplicateInColumn(row, col, value) ||
+                hasDuplicateInSquare(row, col, value)
+              ) {
+                cell.style.backgroundColor = "red"; // Highlight cell in red if duplicate is found
+              }
+            }
+          }
+        }
+      }
+
+      function hasDuplicateInRow(row, col, value) {
+        // Check the row for duplicate values
+        for (let c = 0; c < 4; c++) {
+          if (c !== col) {
+            const cell = document.querySelector(
+              `.cell[data-row="${row}"][data-col="${c}"]`
+            );
+            if (cell.value === value) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      function hasDuplicateInColumn(row, col, value) {
+        // Check the column for duplicate values
+        for (let r = 0; r < 4; r++) {
+          if (r !== row) {
+            const cell = document.querySelector(
+              `.cell[data-row="${r}"][data-col="${col}"]`
+            );
+            if (cell.value === value) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+
+      function hasDuplicateInSquare(row, col, value) {
+        // Identify the top-left corner of the 2x2 square
+        const startRow = Math.floor(row / 2) * 2;
+        const startCol = Math.floor(col / 2) * 2;
+
+        // Check the 2x2 square for duplicate values
+        for (let r = startRow; r < startRow + 2; r++) {
+          for (let c = startCol; c < startCol + 2; c++) {
+            if (r !== row || c !== col) {
+              const cell = document.querySelector(
+                `.cell[data-row="${r}"][data-col="${c}"]`
+              );
+              if (cell.value === value) {
+                return true;
+              }
+            }
+          }
+        }
+        return false;
+      }
+
+      let selectedCell = null;
+
+      // Function to handle cell selection (remains largely the same)
+      document.querySelectorAll(".cell").forEach((cell) => {
+        cell.addEventListener("click", () => {
+          // Deselect previously selected cell, if any
+          document
+            .querySelectorAll(".cell")
+            .forEach((c) => c.classList.remove("selected"));
+          // Mark the clicked cell as selected
+          cell.classList.add("selected");
+          selectedCell = cell;
+        });
+      });
+
+      document.querySelectorAll(".cell").forEach((cell) => {
+        // Add event listener to enforce a single character and validate input
+        cell.addEventListener("input", () => {
+          const validValues = ["1", "2", "3", "4"];
+          if (cell.value.length > 1 || !validValues.includes(cell.value)) {
+            cell.value = ""; // Clear invalid input if length > 1 or value is not 1-4
+            alert("Only values 1, 2, 3, or 4 are allowed.");
+          }
+        });
+      });
+
+      function selectNumber(num) {
+        if (selectedCell) {
+          //selectedCell.value = num;
+          // Store the previous value of the cell before changing it
+          const previousValue = selectedCell.value;
+
+          // Update the cell with the new number
+          selectedCell.value = num;
+
+          // Record the move in the history if the previous value was empty or different
+          if (!previousValue || previousValue !== num.toString()) {
+            moveHistory.push({
+              row: selectedCell.dataset.row,
+              col: selectedCell.dataset.col,
+              previousValue: previousValue, // Save the previous value for accurate undo
+              newValue: num,
+            });
+          }
+
+          selectedCell.classList.remove("selected"); // Deselect the cell after filling
+          selectedCell = null; // Reset the selected cell
+
+          validateBoard(); // Validate the board after filling in a number
+        } else {
+          alert("Please select a cell first.");
+        }
+      }
+
       let gameSolved = false; // Flag to track if the game is solved
+      let moveHistory = [];
 
       async function checkSolution() {
         const solution = [];
@@ -40,13 +277,7 @@
         });
 
         const result = await response.json();
-        /*
-        alert(
-          result.status === "correct"
-            ? "Sudoku has been solved!"
-            : "Incorrect solution."
-        );
-        */
+
         if (result.status === "correct") {
           alert("Sudoku has been solved!");
           stopTimer(); // Stop the timer when the solution is correct
@@ -66,78 +297,17 @@
         resetTimer();
       }
 
+      // Update the grid with a new puzzle
       function updateGrid(puzzle) {
         document.querySelectorAll(".cell").forEach((cell, i) => {
           const row = Math.floor(i / 4);
           const col = i % 4;
           const value = puzzle[row][col];
-          cell.value = value || "";
+          cell.value = value || ""; // Set cell value or clear if empty
           cell.disabled = !!value; // Disable pre-filled cells
           cell.style.color = value ? "blue" : "black"; // Blue for pre-filled, black for user input
         });
-
-        moveHistory = [];
-      }
-
-      /* 
-        This is the code for the undo button and keeping track of history functionality. Currently it does not work properly
-      */
-
-      // Function to track a move and save it to the backend
-      function trackMove(row, col, newValue) {
-        $.ajax({
-          url: "/track_move",
-          method: "POST",
-          contentType: "application/json",
-          data: JSON.stringify({ row: row, col: col, value: newValue }),
-          success: function (response) {
-            if (response.status === "success") {
-              console.log("Move tracked successfully.");
-            }
-          },
-        });
-      }
-
-      // Attach event listener to each cell to track user inputs
-      document.querySelectorAll(".cell").forEach((cell) => {
-        cell.addEventListener("input", (event) => {
-          const row = parseInt(cell.getAttribute("data-row"));
-          const col = parseInt(cell.getAttribute("data-col"));
-          const newValue = parseInt(event.target.value) || "";
-
-          // Track the input in backend history
-          trackMove(row, col, newValue);
-
-          // Debug: Log the move being tracked
-          console.log("Tracking move:", { row, col, newValue });
-        });
-      });
-
-      // Function to undo the last move
-      function undoMove() {
-        $.ajax({
-          url: "/undo",
-          method: "POST",
-          contentType: "application/json",
-          success: function (data) {
-            if (data.status === "success") {
-              // Update the board with the reverted state
-              updateBoard(data.board);
-            } else {
-              alert(data.message);
-            }
-          },
-        });
-      }
-
-      // Function to update the board on the frontend with new values
-      function updateBoard(flattenedBoard) {
-        document.querySelectorAll(".cell").forEach((cell, index) => {
-          const row = Math.floor(index / 4);
-          const col = index % 4;
-          const value = flattenedBoard[index];
-          cell.value = value !== 0 ? value : ""; // Display empty for 0 values
-        });
+        moveHistory = []; // Clear the move history for a new game
       }
 
       // Timer Functions Setup
@@ -219,41 +389,5 @@
         startTimer();
       };
     </script>
-  </head>
-  <body onload="updateGrid({{ puzzle|tojson }});">
-    <h1>4x4 Sudoku Game</h1>
-
-    <!-- Top controls: Timer, Difficulty, and Dark/Light Mode -->
-    <div class="top-controls">
-      <div id="timer">00:00:00</div>
-
-      <label for="difficulty">Difficulty:</label>
-      <select id="difficulty">
-        <option value="easy">Easy</option>
-        <option value="medium">Medium</option>
-        <option value="hard">Hard</option>
-      </select>
-
-      <button onclick="toggleTheme()" id="theme-toggle">Dark Mode</button>
-    </div>
-
-    <!-- Displaying the board (4x4) grid -->
-    <div
-      style="display: grid; grid-template-columns: repeat(4, 50px); gap: 5px"
-    >
-      {% for row_index in range(4) %} {% for col_index in range(4) %} <input
-      type="text" class="cell" data-row="{{ row_index }}" data-col="{{ col_index
-      }}" value="{{ puzzle[row_index][col_index] if puzzle[row_index][col_index]
-      != 0 else '' }}" {{ 'disabled' if puzzle[row_index][col_index] != 0 }}
-      style="width: 50px; height: 50px; text-align: center;"> {% endfor %} {%
-      endfor %}
-    </div>
-
-    <!-- Bottom controls: Check Solution, New Game, Undo -->
-    <div class="bottom-controls">
-      <button onclick="checkSolution()">Check solution</button>
-      <button onclick="newGame()">Create new game</button>
-      <button onclick="undoMove()">Undo</button>
-    </div>
   </body>
 </html>
