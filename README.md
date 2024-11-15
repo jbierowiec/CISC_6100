@@ -113,14 +113,14 @@ To start the backend and frontend servers, follow these steps:
 - Once evrything is fixed, implemented and the whole system is working, we can then add more functionality if needed, and we need to think about setting up a login system for individual users, other potential pages, like a settings page, etc.
 
 ## To Do List
-~~1. Light/Dark Mode Toggle Implemented~~
-~~2. Timer Implemented~~
-~~3. Generate New Game Button Implemented~~
-~~4. Check Solution Button Implemented~~
-~~5. Undo Button Implemented~~
-~~6. Number Buttons Implemented~~
-~~7. Difficulty Dropdown Button Implemented~~
-~~8. Entering a number that is duplicated in the same row/column or 2x2 square warning~~
+1. ~~Light/Dark Mode Toggle Implemented~~
+2. ~~Timer Implemented~~
+3. ~~Generate New Game Button Implemented~~
+4. ~~Check Solution Button Implemented~~
+5. ~~Undo Button Implemented~~
+6. ~~Number Buttons Implemented~~
+7. ~~Difficulty Dropdown Button Implemented~~
+8. ~~Entering a number that is duplicated in the same row/column or 2x2 square warning~~
 9. Undo Until Correct Button
 10. Generate Random Hint Button
 11. Generate Specific Hint Button
