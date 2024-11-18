@@ -332,6 +332,7 @@
         const { puzzle, solution } = await response.json();
         updateGrid(puzzle);
         resetTimer();
+        moveHistory = [];
       }
 
       // Update the grid with a new puzzle
