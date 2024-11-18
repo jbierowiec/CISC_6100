@@ -131,15 +131,15 @@ To start the backend and frontend servers, follow these steps:
 6. ~~Number Buttons Implemented~~
 7. ~~Difficulty Dropdown Button Implemented~~
 8. ~~Entering a number that is duplicated in the same row/column or 2x2 square warning~~
-9. Undo Until Correct Button
-10. Generate Random Hint Button
-11. Generate Specific Hint Button
-12. Set Note Mode Off/On Button
-13. Show Solution Button
-14. Database with 9x9 grids
-15. Sudoku Board Size Dropdown Button
-16. Display of 9x9 Sudoku Grid on Screen
-17. Generalized Buttons to work for any Grid Size
+9. ~~Database with 9x9 and 16x16 grids~~
+10. ~~Sudoku Board Size Dropdown Button~~
+11. ~~Display of Different Sudoku Grids on Screen~~
+12. ~~Generalized Buttons to work for any Grid Size~~
+13. Undo Until Correct Button
+14. Generate Random Hint Button
+15. Generate Specific Hint Button
+16. Set Note Mode Off/On Button
+17. Show Solution Button
 18. Home Page
 19. Login System
 20. Proper Backend Communication with Frontend
