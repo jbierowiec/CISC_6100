@@ -10,6 +10,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>Sudoku Game</title>
   </head>
+  
   <body onload="updateGrid({{ puzzle|tojson }});">
     <h1>Sudoku Game</h1>
 
@@ -54,6 +55,7 @@
       <button onclick="checkSolution()">Check solution</button>
       <button onclick="newGame()">Create new game</button>
       <button onclick="undoMove()">Undo</button>
+      <button onclick="undoUntilCorrect()">Undo Until Correct</button>
     </div>
 
     <script>
@@ -71,9 +73,38 @@
         const cell = document.querySelector(
           `.cell[data-row="${lastMove.row}"][data-col="${lastMove.col}"]`
         );
-        cell.value = lastMove.previousValue || ""; // Clear the cell's value
+        if(cell){
+          cell.value = lastMove.previousValue || ""; // Clear the cell's value
+        }
 
         validateBoard(); // Re-validate the board after undoing the move
+      }
+
+      function undoUntilCorrect() {
+        if (moveHistory.length === 0) {
+          alert("No moves to undo.");
+          return;
+        }
+
+        // Filter out moves where `correct` is false
+        for (let i = moveHistory.length - 1; i >= 0; i--) {
+          if (moveHistory[i].correct === false) {
+            const move = moveHistory[i];
+            
+            // Update the game board based on the move
+            const cell = document.querySelector(
+              `.cell[data-row="${move.row}"][data-col="${move.col}"]`
+            );
+            if (cell) {
+              cell.value = move.previousValue || ""; // Reset the cell to its previous value
+            }
+
+            // Remove the entry from moveHistory
+            moveHistory.splice(i, 1);
+
+            validateBoard();
+          }
+        }
       }
 
       document.querySelectorAll(".cell").forEach((cell) => {
@@ -88,13 +119,17 @@
             // Get the previous value before updating it
             const previousValue = cell.dataset.previousValue || "";
 
+            const correct = (current_solution[row][col] == newValue);
+
             // Record the move
             moveHistory.push({
               row: row,
               col: col,
               previousValue: previousValue, // Store the previous value
               newValue: newValue,
+              correct: correct //add a correct field so we can easily check if a move is correct
             });
+            console.log("move made");
 
             // Update `previousValue` data attribute to the current value for next time
             cell.dataset.previousValue = newValue;

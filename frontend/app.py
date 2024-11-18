@@ -20,7 +20,11 @@ def index():
     puzzle = requests.get(f"{BACKEND_URL}/get_puzzle/").json()
     global current_board
     current_board = puzzle["puzzle"]  # Initialize the current board with the puzzle
-    return render_template('index.html', puzzle=puzzle["puzzle"])
+    return render_template(
+        'index.html',
+        puzzle=puzzle["puzzle"],
+        solution=puzzle["solution"]  # Pass the solution to the template
+    )
 
 @app.route('/check_solution', methods=['POST'])
 def check_solution():
@@ -50,7 +54,10 @@ def new_game():
         global current_board, HISTORY
         current_board = game["puzzle"]
         HISTORY = []  # Reset move history when a new game is loaded
-        return jsonify({"puzzle": game["puzzle"]})
+        return jsonify({
+            "puzzle": game["puzzle"],
+            "solution": game["solution"]
+        })
     else:
         return jsonify({"error": "No games found for the selected difficulty"}), 404
 
