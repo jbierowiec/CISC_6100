@@ -32,10 +32,18 @@ def check_solution():
 def new_game():
     # Get the difficulty from the request
     difficulty = request.args.get('difficulty', 'easy').lower()
+    
+    # Get the size from the request, default to 4x4 if not provided
+    size = int(request.args.get('size', 4))
 
     # Filter games by the selected difficulty
-    filtered_games = [game for game in games_data if game["difficulty"] == difficulty]
-
+    filtered_games = [game for game in games_data if game["difficulty"] == difficulty and game["size"] == size]
+    
+    # Log when no games are found for debugging purposes
+    if not filtered_games:
+        print(f"No games found for difficulty '{difficulty}' and size {size}.")
+        return jsonify({"error": f"No games found for difficulty '{difficulty}' and size {size}"}), 404
+   
     # Choose a random game from the filtered list
     if filtered_games:
         game = random.choice(filtered_games)

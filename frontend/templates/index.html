@@ -11,7 +11,7 @@
     <title>Sudoku Game</title>
   </head>
   <body onload="updateGrid({{ puzzle|tojson }});">
-    <h1>4x4 Sudoku Game</h1>
+    <h1>Sudoku Game</h1>
 
     <!-- Top controls: Timer, Difficulty, and Dark/Light Mode -->
     <div class="top-controls">
@@ -24,11 +24,20 @@
         <option value="hard">Hard</option>
       </select>
 
+      <label for="puzzleSize">Puzzle Size:</label>
+      <select id="puzzleSize">
+        <option value="4">4x4</option>
+        <option value="9">9x9</option>
+        <option value="16">16x16</option>
+      </select>
+
       <button onclick="toggleTheme()" id="theme-toggle">Dark Mode</button>
     </div>
 
+    <div id="sudoku-grid"></div>
+    <div class="note-container"></div>
     <!-- Displaying the board (4x4) grid -->
-
+    <!--
     <div
       style="display: grid; grid-template-columns: repeat(4, 50px); gap: 5px"
     >
@@ -39,7 +48,7 @@
       style="width: 50px; height: 50px; text-align: center;"> {% endfor %} {%
       endfor %}
       <div class="note-container"></div>
-    </div>
+    </div>-->
 
     <!-- maxlength="1" oninput="validateInput(this)"  -->
 
@@ -196,19 +205,6 @@
 
       let selectedCell = null;
 
-      // Function to handle cell selection (remains largely the same)
-      document.querySelectorAll(".cell").forEach((cell) => {
-        cell.addEventListener("click", () => {
-          // Deselect previously selected cell, if any
-          document
-            .querySelectorAll(".cell")
-            .forEach((c) => c.classList.remove("selected"));
-          // Mark the clicked cell as selected
-          cell.classList.add("selected");
-          selectedCell = cell;
-        });
-      });
-
       document.querySelectorAll(".cell").forEach((cell) => {
         // Add event listener to enforce a single character and validate input
         cell.addEventListener("input", () => {
@@ -290,13 +286,63 @@
       async function newGame() {
         const difficulty = document.getElementById("difficulty").value;
 
-        const response = await fetch(`/new_game?difficulty=${difficulty}`);
-
+        const puzzleSize = document.getElementById("puzzleSize").value; // Get the selected puzzle size 
+        
+        const response = await fetch(`/new_game?difficulty=${difficulty}&size=${puzzleSize}`);
+        
         const { puzzle } = await response.json();
+        console.log(puzzle)
         updateGrid(puzzle);
         resetTimer();
       }
 
+      // call newgame() function to generate initial puzzle
+      newgame() 
+
+      function updateGrid(puzzle) {
+        const size = puzzle.length;
+        const grid = document.getElementById("sudoku-grid");
+      
+        const cellSize = size === 16 ? "30px" : size === 9 ? "40px" : "50px"; // Adjust cell size based on grid size
+    
+        // Sets up CSS grid with the appropriate size
+        grid.style.gridTemplateRows = `repeat(${size}, ${cellSize})`;
+        grid.style.gridTemplateColumns = `repeat(${size}, ${cellSize})`;
+        grid.innerHTML = ""; // Clear existing grid
+      
+        // Generate cells dynamically
+        for (let row = 0; row < size; row++) {
+          for (let col = 0; col < size; col++) {
+            const cell = document.createElement("input");
+            cell.type = "text";
+            cell.classList.add("cell");
+            cell.dataset.row = row;
+            cell.dataset.col = col;
+            cell.value = puzzle[row][col] || ""; // Empty for unfilled cells
+            cell.disabled = !!puzzle[row][col]; // Disable pre-filled cells
+            cell.style.textAlign = "center";
+            cell.style.width = cellSize;
+            cell.style.height = cellSize;
+            grid.appendChild(cell);
+          }
+        }
+        moveHistory = []; // Reset move history
+
+        // Function to handle cell selection (remains largely the same)
+        document.querySelectorAll(".cell").forEach((cell) => {
+        cell.addEventListener("click", () => {
+        // Deselect previously selected cell, if any
+        document.querySelectorAll(".cell")
+        .forEach((c) => c.classList.remove("selected"));
+        // Mark the clicked cell as selected
+        cell.classList.add("selected");
+        selectedCell = cell;
+    });
+  });
+}
+  
+      
+/*
       // Update the grid with a new puzzle
       function updateGrid(puzzle) {
         document.querySelectorAll(".cell").forEach((cell, i) => {
@@ -308,7 +354,7 @@
           cell.style.color = value ? "blue" : "black"; // Blue for pre-filled, black for user input
         });
         moveHistory = []; // Clear the move history for a new game
-      }
+      }*/
 
       // Timer Functions Setup
       let timerInterval;
