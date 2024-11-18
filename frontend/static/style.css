@@ -43,8 +43,8 @@ h1 {
     width: 100px;
 }
 
-/* Difficulty dropdown and buttons */
-#difficulty, button {
+/* Difficulty/puzzleSize dropdown and buttons */
+#difficulty, #puzzleSize, button {
     font-size: 1em;
     padding: 8px 12px;
     border: 1px solid #ccc;
@@ -80,7 +80,7 @@ body.dark-mode button:nth-of-type(5) { background-color: #2f855a; color: #ddd; }
 body.dark-mode button:nth-of-type(6) { background-color: #c53030; color: #ddd; }
 
 /* Grid styling */
-.grid-container {
+#sudoku-grid {
     display: grid;
     grid-gap: 5px;
     margin-bottom: 20px;
@@ -152,6 +152,14 @@ body.dark-mode #timer {
     opacity: 0.9;
 }
 
+#puzzleSize {
+    background-color: #a9b02b;
+    color: white;
+}
+
+#puzzleSize:hover {
+    opacity: 0.9;
+}
 
 body.dark-mode #difficulty {
     background-color: #2f855a;
@@ -167,23 +175,6 @@ body.dark-mode .grid-container .cell {
     color: #ddd;
     background-color: #333;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .number-controls {
     display: flex;
