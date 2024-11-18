@@ -19,7 +19,7 @@
       <div id="timer">00:00:00</div>
 
       <label for="difficulty">Difficulty:</label>
-      <select id="difficulty" onchange="newGame()">
+      <select id="difficulty">
         <option value="easy">Easy</option>
         <option value="medium">Medium</option>
         <option value="hard">Hard</option>
@@ -43,12 +43,7 @@
     <!-- maxlength="1" oninput="validateInput(this)"  -->
 
     <!-- Number input buttons -->
-    <div class="number-controls">
-      <button onclick="selectNumber(1)">1</button>
-      <button onclick="selectNumber(2)">2</button>
-      <button onclick="selectNumber(3)">3</button>
-      <button onclick="selectNumber(4)">4</button>
-    </div>
+    <div class="number-controls"></div>
 
     <!-- Bottom controls: Check Solution, New Game, Undo -->
     <div class="bottom-controls">
@@ -320,13 +315,10 @@
         resetTimer();
       }
 
-      // call newgame() function to generate initial puzzle
-      newgame() 
-
       function updateGrid(puzzle) {
         const size = puzzle.length;
         const grid = document.getElementById("sudoku-grid");
-      
+        
         const cellSize = size === 16 ? "30px" : size === 9 ? "40px" : "50px"; // Adjust cell size based on grid size
     
         // Sets up CSS grid with the appropriate size
@@ -351,7 +343,9 @@
           }
         }
         moveHistory = []; // Reset move history
-
+        
+        // Adjust number buttons based on grid size
+        updateNumberButtons(size);
         // Function to handle cell selection (remains largely the same)
         document.querySelectorAll(".cell").forEach((cell) => {
         cell.addEventListener("click", () => {
@@ -364,6 +358,22 @@
     });
   });
 }
+        // Function to generate number buttons based on the grid size
+        function updateNumberButtons(size) {
+        const buttonContainer = document.querySelector(".number-controls");
+        buttonContainer.innerHTML = ""; // Clear existing buttons
+
+        // Determine the range of numbers based on grid size
+        const maxNumber = (size === 16) ? 16 : (size === 9) ? 9 : 4;
+    
+        // Generate buttons from 1 to maxNumber
+        for (let i = 1; i <= maxNumber; i++) {
+        const button = document.createElement("button");
+        button.textContent = i;
+        button.onclick = () => selectNumber(i); // Assign the number when clicked
+        buttonContainer.appendChild(button);
+        }
+      }
 
       // Timer Functions Setup
       let timerInterval;
