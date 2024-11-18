@@ -34,21 +34,10 @@
       <button onclick="toggleTheme()" id="theme-toggle">Dark Mode</button>
     </div>
 
+    <!-- Displaying the Board -->
     <div id="sudoku-grid"></div>
     <div class="note-container"></div>
-    <!-- Displaying the board (4x4) grid -->
-    <!--
-    <div
-      style="display: grid; grid-template-columns: repeat(4, 50px); gap: 5px"
-    >
-      {% for row_index in range(4) %} {% for col_index in range(4) %} <input
-      type="text" class="cell" data-row="{{ row_index }}" data-col="{{ col_index
-      }}" value="{{ puzzle[row_index][col_index] if puzzle[row_index][col_index]
-      != 0 else '' }}" {{ 'disabled' if puzzle[row_index][col_index] != 0 }}
-      style="width: 50px; height: 50px; text-align: center;"> {% endfor %} {%
-      endfor %}
-      <div class="note-container"></div>
-    </div>-->
+   
 
     <!-- maxlength="1" oninput="validateInput(this)"  -->
 
@@ -340,21 +329,6 @@
     });
   });
 }
-  
-      
-/*
-      // Update the grid with a new puzzle
-      function updateGrid(puzzle) {
-        document.querySelectorAll(".cell").forEach((cell, i) => {
-          const row = Math.floor(i / 4);
-          const col = i % 4;
-          const value = puzzle[row][col];
-          cell.value = value || ""; // Set cell value or clear if empty
-          cell.disabled = !!value; // Disable pre-filled cells
-          cell.style.color = value ? "blue" : "black"; // Blue for pre-filled, black for user input
-        });
-        moveHistory = []; // Clear the move history for a new game
-      }*/
 
       // Timer Functions Setup
       let timerInterval;
