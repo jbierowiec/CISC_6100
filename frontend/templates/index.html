@@ -10,7 +10,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <title>Sudoku Game</title>
   </head>
-  
+
   <body onload="updateGrid({{ puzzle|tojson }});">
     <h1>Sudoku Game</h1>
 
@@ -38,7 +38,6 @@
     <!-- Displaying the Board -->
     <div id="sudoku-grid"></div>
     <div class="note-container"></div>
-   
 
     <!-- maxlength="1" oninput="validateInput(this)"  -->
 
@@ -54,6 +53,8 @@
     </div>
 
     <script>
+      const puzzleSize = document.getElementById("puzzleSize").value;
+
       // Function to undo the last move
       function undoMove() {
         if (moveHistory.length === 0) {
@@ -68,7 +69,7 @@
         const cell = document.querySelector(
           `.cell[data-row="${lastMove.row}"][data-col="${lastMove.col}"]`
         );
-        if(cell){
+        if (cell) {
           cell.value = lastMove.previousValue || ""; // Clear the cell's value
         }
 
@@ -85,7 +86,7 @@
         for (let i = moveHistory.length - 1; i >= 0; i--) {
           if (moveHistory[i].correct === false) {
             const move = moveHistory[i];
-            
+
             // Update the game board based on the move
             const cell = document.querySelector(
               `.cell[data-row="${move.row}"][data-col="${move.col}"]`
@@ -114,7 +115,7 @@
             // Get the previous value before updating it
             const previousValue = cell.dataset.previousValue || "";
 
-            const correct = (current_solution[row][col] == newValue);
+            const correct = current_solution[row][col] == newValue;
 
             // Record the move
             moveHistory.push({
@@ -122,7 +123,7 @@
               col: col,
               previousValue: previousValue, // Store the previous value
               newValue: newValue,
-              correct: correct //add a correct field so we can easily check if a move is correct
+              correct: correct, //add a correct field so we can easily check if a move is correct
             });
             console.log("move made");
 
@@ -145,14 +146,15 @@
       });
 
       function validateBoard() {
-        // Clear previous highlights
+        const gridSize = document.querySelectorAll(".cell").length ** 0.5;
+        const squareSize = Math.sqrt(gridSize);
+
         document.querySelectorAll(".cell").forEach((cell) => {
           cell.style.backgroundColor = ""; // Reset background color
         });
 
-        // Check for duplicates in rows, columns, and 2x2 squares
-        for (let row = 0; row < 4; row++) {
-          for (let col = 0; col < 4; col++) {
+        for (let row = 0; row < gridSize; row++) {
+          for (let col = 0; col < gridSize; col++) {
             const cell = document.querySelector(
               `.cell[data-row="${row}"][data-col="${col}"]`
             );
@@ -160,25 +162,24 @@
 
             if (value) {
               if (
-                hasDuplicateInRow(row, col, value) ||
-                hasDuplicateInColumn(row, col, value) ||
-                hasDuplicateInSquare(row, col, value)
+                hasDuplicateInRow(row, col, value, gridSize) ||
+                hasDuplicateInColumn(row, col, value, gridSize) ||
+                hasDuplicateInSquare(row, col, value, squareSize)
               ) {
-                cell.style.backgroundColor = "red"; // Highlight cell in red if duplicate is found
+                cell.style.backgroundColor = "red";
               }
             }
           }
         }
       }
 
-      function hasDuplicateInRow(row, col, value) {
-        // Check the row for duplicate values
-        for (let c = 0; c < 4; c++) {
+      function hasDuplicateInRow(row, col, value, gridSize) {
+        for (let c = 0; c < gridSize; c++) {
           if (c !== col) {
             const cell = document.querySelector(
               `.cell[data-row="${row}"][data-col="${c}"]`
             );
-            if (cell.value === value) {
+            if (cell && cell.value === value) {
               return true;
             }
           }
@@ -186,14 +187,13 @@
         return false;
       }
 
-      function hasDuplicateInColumn(row, col, value) {
-        // Check the column for duplicate values
-        for (let r = 0; r < 4; r++) {
+      function hasDuplicateInColumn(row, col, value, gridSize) {
+        for (let r = 0; r < gridSize; r++) {
           if (r !== row) {
             const cell = document.querySelector(
               `.cell[data-row="${r}"][data-col="${col}"]`
             );
-            if (cell.value === value) {
+            if (cell && cell.value === value) {
               return true;
             }
           }
@@ -201,21 +201,18 @@
         return false;
       }
 
-      function hasDuplicateInSquare(row, col, value) {
-        // Identify the top-left corner of the 2x2 square
-        const startRow = Math.floor(row / 2) * 2;
-        const startCol = Math.floor(col / 2) * 2;
+      function hasDuplicateInSquare(row, col, value, squareSize) {
+        const startRow = Math.floor(row / squareSize) * squareSize;
+        const startCol = Math.floor(col / squareSize) * squareSize;
 
-        // Check the 2x2 square for duplicate values
-        for (let r = startRow; r < startRow + 2; r++) {
-          for (let c = startCol; c < startCol + 2; c++) {
-            if (r !== row || c !== col) {
-              const cell = document.querySelector(
-                `.cell[data-row="${r}"][data-col="${c}"]`
-              );
-              if (cell.value === value) {
-                return true;
-              }
+        for (let r = startRow; r < startRow + squareSize; r++) {
+          for (let c = startCol; c < startCol + squareSize; c++) {
+            if (
+              (r !== row || c !== col) &&
+              document.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`)
+                ?.value === value
+            ) {
+              return true;
             }
           }
         }
@@ -305,12 +302,14 @@
       async function newGame() {
         const difficulty = document.getElementById("difficulty").value;
 
-        const puzzleSize = document.getElementById("puzzleSize").value; // Get the selected puzzle size 
-        
-        const response = await fetch(`/new_game?difficulty=${difficulty}&size=${puzzleSize}`);
-        
+        const puzzleSize = document.getElementById("puzzleSize").value; // Get the selected puzzle size
+
+        const response = await fetch(
+          `/new_game?difficulty=${difficulty}&size=${puzzleSize}`
+        );
+
         const { puzzle } = await response.json();
-        console.log(puzzle)
+        console.log(puzzle);
         updateGrid(puzzle);
         resetTimer();
         moveHistory = [];
@@ -319,14 +318,14 @@
       function updateGrid(puzzle) {
         const size = puzzle.length;
         const grid = document.getElementById("sudoku-grid");
-        
+
         const cellSize = size === 16 ? "30px" : size === 9 ? "40px" : "50px"; // Adjust cell size based on grid size
-    
+
         // Sets up CSS grid with the appropriate size
         grid.style.gridTemplateRows = `repeat(${size}, ${cellSize})`;
         grid.style.gridTemplateColumns = `repeat(${size}, ${cellSize})`;
         grid.innerHTML = ""; // Clear existing grid
-      
+
         // Generate cells dynamically
         for (let row = 0; row < size; row++) {
           for (let col = 0; col < size; col++) {
@@ -344,35 +343,36 @@
           }
         }
         moveHistory = []; // Reset move history
-        
+
         // Adjust number buttons based on grid size
         updateNumberButtons(size);
         // Function to handle cell selection (remains largely the same)
         document.querySelectorAll(".cell").forEach((cell) => {
-        cell.addEventListener("click", () => {
-        // Deselect previously selected cell, if any
-        document.querySelectorAll(".cell")
-        .forEach((c) => c.classList.remove("selected"));
-        // Mark the clicked cell as selected
-        cell.classList.add("selected");
-        selectedCell = cell;
-    });
-  });
-}
-        // Function to generate number buttons based on the grid size
-        function updateNumberButtons(size) {
+          cell.addEventListener("click", () => {
+            // Deselect previously selected cell, if any
+            document
+              .querySelectorAll(".cell")
+              .forEach((c) => c.classList.remove("selected"));
+            // Mark the clicked cell as selected
+            cell.classList.add("selected");
+            selectedCell = cell;
+          });
+        });
+      }
+      // Function to generate number buttons based on the grid size
+      function updateNumberButtons(size) {
         const buttonContainer = document.querySelector(".number-controls");
         buttonContainer.innerHTML = ""; // Clear existing buttons
 
         // Determine the range of numbers based on grid size
-        const maxNumber = (size === 16) ? 16 : (size === 9) ? 9 : 4;
-    
+        const maxNumber = size === 16 ? 16 : size === 9 ? 9 : 4;
+
         // Generate buttons from 1 to maxNumber
         for (let i = 1; i <= maxNumber; i++) {
-        const button = document.createElement("button");
-        button.textContent = i;
-        button.onclick = () => selectNumber(i); // Assign the number when clicked
-        buttonContainer.appendChild(button);
+          const button = document.createElement("button");
+          button.textContent = i;
+          button.onclick = () => selectNumber(i); // Assign the number when clicked
+          buttonContainer.appendChild(button);
         }
       }
 
