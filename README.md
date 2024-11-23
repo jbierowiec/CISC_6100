@@ -140,9 +140,9 @@ To start the backend and frontend servers, follow these steps:
 15. Generate Specific Hint Button
 16. Set Note Mode Off/On Button
 17. Show Solution Button
-18. Home Page
-19. Login System
-20. Proper Backend Communication with Frontend
+18. Home Page & Game Page 
+19. Proper Backend Communication with Frontend
+20. Separate JavaScript & HTML files
 
 ## Description of Implementations
 - Undo Until Correct Buton (take away all wrong numbers until it reaches the cells with only correct and preset values)
@@ -154,6 +154,6 @@ To start the backend and frontend servers, follow these steps:
 - Dropdown button for the user to choose the sudoku game size, and for the corresponding grid to display and for the buttons to pull the properly sized games from the JSON file Sudoku game stored games
 - Display of the 9x9 sudoku board game and vice versa 4x4 grid based on the user's choice of size from the Dropdown Button
 - Make sure the functions become generalized to work for a 4x4 and a 9x9 grid
-- Home page where the user first clicks on a size and difficulty and then they are redirected to the game (don't just have one game page with all th buttons and user choices there)
-- Login system so that the user can log in to the game (be separated from individual users)
+- Home page where the user enters their name and also clicks on a size and difficulty. They should then be redirected to the game page (don't just have one game page with all the buttons and user choices there)
 - Generate New Game button reloads the Backend to include that specifc game so that the Check Solution Button will work along with all other buttons
+- The HTML file is currently 700 lines long with the combination of HTML and JavaScript on the file, for better file structure, it would be better to create a separate JavaScript file containing the functionality and separate directory for the index and game pages when both pages are implemented

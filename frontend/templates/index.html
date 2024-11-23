@@ -17,6 +17,7 @@
     <!-- Top controls: Timer, Difficulty, and Dark/Light Mode -->
     <div class="top-controls">
       <div id="timer">00:00:00</div>
+      <button id="pause-button" onclick="togglePause()">Stop</button>
 
       <label for="difficulty">Difficulty:</label>
       <select id="difficulty">
@@ -33,13 +34,12 @@
       </select>
 
       <button onclick="toggleTheme()" id="theme-toggle">Dark Mode</button>
+      <div id="mistake-counter">Mistakes: 0/3</div>
     </div>
 
     <!-- Displaying the Board -->
     <div id="sudoku-grid"></div>
     <div class="note-container"></div>
-
-    <!-- maxlength="1" oninput="validateInput(this)"  -->
 
     <!-- Number input buttons -->
     <div class="number-controls"></div>
@@ -49,7 +49,30 @@
       <button onclick="checkSolution()">Check solution</button>
       <button onclick="newGame()">Create new game</button>
       <button onclick="undoMove()">Undo</button>
+      <!--
       <button onclick="undoUntilCorrect()">Undo Until Correct</button>
+      <button id="set-note-button" onclick="toggleSetNote()">
+        Set Note: Off
+      </button>
+    --></div>
+
+    <!-- Loss message modal -->
+    <div
+      id="loss-message"
+      style="
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        border: 2px solid black;
+        padding: 20px;
+        text-align: center;
+      "
+    >
+      <p>You Lost!</p>
+      <p>Retry in <span id="retry-timer">10</span> seconds...</p>
     </div>
 
     <script>
@@ -103,6 +126,7 @@
         }
       }
 
+      /*
       document.querySelectorAll(".cell").forEach((cell) => {
         // Listen for direct keyboard input in each cell
         cell.addEventListener("input", () => {
@@ -137,6 +161,53 @@
           }
         });
       });
+      */
+
+      document.querySelectorAll(".cell").forEach((cell) => {
+        // Listen for direct keyboard input in each cell
+        cell.addEventListener("input", () => {
+          const row = cell.dataset.row;
+          const col = cell.dataset.col;
+          const newValue = cell.value;
+
+          // Get the grid size for validation
+          const gridSize = Math.sqrt(document.querySelectorAll(".cell").length);
+
+          // Validate the input (e.g., number within range)
+          if (
+            newValue &&
+            !isNaN(newValue) &&
+            newValue >= 1 &&
+            newValue <= gridSize
+          ) {
+            // Capture the previous value from the cell's dataset
+            const previousValue = cell.dataset.previousValue || "";
+
+            // Determine if the new value is correct
+            const correct = current_solution[row][col] == newValue;
+
+            // Add the move to the move history
+            moveHistory.push({
+              row: row,
+              col: col,
+              previousValue: previousValue,
+              newValue: newValue,
+              correct: correct,
+            });
+
+            console.log("Move recorded:", moveHistory);
+
+            // Update the `previousValue` attribute for next time
+            cell.dataset.previousValue = newValue;
+
+            // Revalidate the board after the move
+            validateBoard();
+          } else {
+            cell.value = ""; // Clear invalid input
+            alert(`Please enter a number between 1 and ${gridSize}.`);
+          }
+        });
+      });
 
       document.querySelectorAll(".cell").forEach((cell) => {
         // Add event listener to validate the board after each input
@@ -145,9 +216,67 @@
         });
       });
 
+      let mistakeCount = 0;
+      const maxMistakes = 3;
+
+      function incrementMistakeCounter() {
+        mistakeCount++;
+        document.getElementById(
+          "mistake-counter"
+        ).textContent = `Mistakes: ${mistakeCount}/3`;
+
+        if (mistakeCount === maxMistakes) {
+          triggerLoss();
+        }
+      }
+
+      function triggerLoss() {
+        // Stop the timer
+        stopTimer();
+
+        // Show the loss message
+        const lossMessage = document.getElementById("loss-message");
+        lossMessage.style.display = "block";
+
+        // Disable board inputs
+        disableBoard();
+
+        let timer = 10; // Countdown timer
+        const timerElement = document.getElementById("retry-timer");
+        const interval = setInterval(() => {
+          timerElement.textContent = --timer;
+          if (timer === 0) {
+            clearInterval(interval);
+            resetGameBoard();
+            lossMessage.style.display = "none";
+            mistakeCount = 0;
+            document.getElementById(
+              "mistake-counter"
+            ).textContent = `Mistakes: 0/3`;
+          }
+        }, 1000);
+      }
+
+      function disableBoard() {
+        document.querySelectorAll(".cell").forEach((cell) => {
+          cell.disabled = true;
+        });
+      }
+
+      function resetGameBoard() {
+        newGame();
+
+        mistakeCount = 0;
+        document.getElementById(
+          "mistake-counter"
+        ).textContent = `Mistakes: 0/3`;
+      }
+
+      // Update the validation logic to count mistakes
       function validateBoard() {
-        const gridSize = document.querySelectorAll(".cell").length ** 0.5;
+        const gridSize = Math.sqrt(document.querySelectorAll(".cell").length);
         const squareSize = Math.sqrt(gridSize);
+        let hasMistakes = false;
 
         document.querySelectorAll(".cell").forEach((cell) => {
           cell.style.backgroundColor = ""; // Reset background color
@@ -167,11 +296,23 @@
                 hasDuplicateInSquare(row, col, value, squareSize)
               ) {
                 cell.style.backgroundColor = "red";
+                hasMistakes = true;
               }
             }
           }
         }
+
+        if (hasMistakes) {
+          incrementMistakeCounter();
+        }
       }
+
+      // Update event listeners
+      document.querySelectorAll(".cell").forEach((cell) => {
+        cell.addEventListener("input", () => {
+          validateBoard();
+        });
+      });
 
       function hasDuplicateInRow(row, col, value, gridSize) {
         for (let c = 0; c < gridSize; c++) {
@@ -311,13 +452,50 @@
         const { puzzle } = await response.json();
         console.log(puzzle);
         updateGrid(puzzle);
+
+        // Reset the mistake counter
+        mistakeCount = 0;
+        document.getElementById(
+          "mistake-counter"
+        ).textContent = `Mistakes: ${mistakeCount}/3`;
+
         resetTimer();
         moveHistory = [];
       }
 
+      function updateBorders() {
+  const isDarkMode = document.body.classList.contains("dark-mode");
+  const borderColor = isDarkMode ? "rgb(255, 196, 33)" : "black";
+
+  document.querySelectorAll(".cell").forEach((cell) => {
+    const row = parseInt(cell.dataset.row);
+    const col = parseInt(cell.dataset.col);
+    const gridSize = Math.sqrt(document.querySelectorAll(".cell").length);
+
+    // Determine sub-grid size
+    const subGridSize = Math.sqrt(gridSize);
+
+    // Update border colors for sub-grid separators
+    if (row % subGridSize === 0) {
+      cell.style.borderTop = `2px solid ${borderColor}`;
+    }
+    if (col % subGridSize === 0) {
+      cell.style.borderLeft = `2px solid ${borderColor}`;
+    }
+    if ((row + 1) % subGridSize === 0) {
+      cell.style.borderBottom = `2px solid ${borderColor}`;
+    }
+    if ((col + 1) % subGridSize === 0) {
+      cell.style.borderRight = `2px solid ${borderColor}`;
+    }
+  });
+}
+
+
       function updateGrid(puzzle) {
         const size = puzzle.length;
         const grid = document.getElementById("sudoku-grid");
+        const subGridSize = Math.sqrt(size);
 
         const cellSize = size === 16 ? "30px" : size === 9 ? "40px" : "50px"; // Adjust cell size based on grid size
 
@@ -334,8 +512,15 @@
             cell.classList.add("cell");
             cell.dataset.row = row;
             cell.dataset.col = col;
-            cell.value = puzzle[row][col] || ""; // Empty for unfilled cells
-            cell.disabled = !!puzzle[row][col]; // Disable pre-filled cells
+            cell.value = puzzle[row][col] || "";
+            if (puzzle[row][col]) {
+              // Mark pre-filled cells
+              cell.disabled = true;
+              cell.dataset.preFilled = "true";
+              cell.style.fontWeight = "bold";
+            } else {
+              cell.dataset.preFilled = "false";
+            }
             cell.style.textAlign = "center";
             cell.style.width = cellSize;
             cell.style.height = cellSize;
@@ -358,6 +543,9 @@
             selectedCell = cell;
           });
         });
+
+        enforceMaxLength();
+        updateBorders();
       }
       // Function to generate number buttons based on the grid size
       function updateNumberButtons(size) {
@@ -376,13 +564,62 @@
         }
       }
 
+      let isPaused = false; // Track the pause state
+
+      function togglePause() {
+        const pauseButton = document.getElementById("pause-button");
+        const cells = document.querySelectorAll(".cell");
+        const buttons = document.querySelectorAll("button");
+
+        if (isPaused) {
+          // Resume the game
+          pauseButton.textContent = "Stop";
+
+          // Restore the original state of all cells
+          cells.forEach((cell) => {
+            //cell.style.backgroundColor = ""; // Restore cell background
+            //cell.style.color = ""; // Restore cell text color
+            cell.style.filter = ""; // Remove blur
+            cell.disabled = cell.dataset.preFilled === "true"; // Disable pre-filled cells
+          });
+
+          // Enable all buttons except the pause button
+          buttons.forEach((button) => {
+            button.disabled = false;
+          });
+
+          startTimer(); // Resume the timer
+          isPaused = false;
+        } else if (!isPaused) {
+          // Pause the game
+          pauseButton.textContent = "Play";
+
+          // Blackout all cells
+          cells.forEach((cell) => {
+            //cell.style.backgroundColor = "black"; // Set background to black
+            //cell.style.color = "black"; // Hide cell text
+            cell.style.filter = "blur(5px)"; // Apply blur
+            cell.disabled = true; // Disable all interactions
+          });
+
+          // Disable all buttons except the pause button
+          buttons.forEach((button) => {
+            if (button.id !== "pause-button") {
+              button.disabled = true;
+            }
+          });
+
+          stopTimer(); // Pause the timer
+          isPaused = true;
+        }
+      }
+
       // Timer Functions Setup
       let timerInterval;
       let seconds = 0;
 
-      // Function to start the timer
       function startTimer() {
-        clearInterval(timerInterval); // clears any existing timer
+        clearInterval(timerInterval); // Ensure no duplicate intervals
         timerInterval = setInterval(() => {
           seconds++;
           document.getElementById("timer").textContent = formatTime(seconds);
@@ -414,14 +651,17 @@
         )}:${String(seconds).padStart(2, "0")}`;
       }
 
-      // Event listener to pause/resume timer on tab visibility change
       document.addEventListener("visibilitychange", () => {
         if (document.hidden) {
-          // Stop the timer when the tab is not active
-          stopTimer();
-        } else if (!gameSolved) {
-          // Resume the timer when the tab becomes active again
-          startTimer();
+          // Tab becomes inactive
+          if (!isPaused) {
+            stopTimer(); // Stop the timer if the game is not paused
+          }
+        } else {
+          // Tab becomes active again
+          if (!isPaused) {
+            startTimer(); // Resume the timer only if the game is not paused
+          }
         }
       });
 
@@ -441,10 +681,20 @@
           themeToggleButton.textContent = "Dark Mode";
           localStorage.setItem("theme", "light");
         }
+
+        updateBorders();
+      }
+
+      function enforceMaxLength() {
+        const cells = document.querySelectorAll(".cell"); // Select all input cells
+        cells.forEach((cell) => {
+          cell.setAttribute("maxlength", "1"); // Enforce maxlength
+        });
       }
 
       // Start the timer when the window loads
       window.onload = () => {
+        enforceMaxLength();
         if (localStorage.getItem("theme") === "dark") {
           document.body.classList.add("dark-mode");
           document.getElementById("theme-toggle").textContent = "Light Mode";
