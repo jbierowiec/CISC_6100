@@ -238,6 +238,11 @@
         const lossMessage = document.getElementById("loss-message");
         lossMessage.style.display = "block";
 
+        const buttons = document.querySelectorAll("button");
+        buttons.forEach((button) => {
+          button.disabled = true;
+        });
+
         // Disable board inputs
         disableBoard();
 
@@ -247,6 +252,11 @@
           timerElement.textContent = --timer;
           if (timer === 0) {
             clearInterval(interval);
+
+            buttons.forEach((button) => {
+              button.disabled = false;
+            });
+
             resetGameBoard();
             lossMessage.style.display = "none";
             mistakeCount = 0;
@@ -464,33 +474,32 @@
       }
 
       function updateBorders() {
-  const isDarkMode = document.body.classList.contains("dark-mode");
-  const borderColor = isDarkMode ? "rgb(255, 196, 33)" : "black";
+        const isDarkMode = document.body.classList.contains("dark-mode");
+        const borderColor = isDarkMode ? "rgb(255, 196, 33)" : "black";
 
-  document.querySelectorAll(".cell").forEach((cell) => {
-    const row = parseInt(cell.dataset.row);
-    const col = parseInt(cell.dataset.col);
-    const gridSize = Math.sqrt(document.querySelectorAll(".cell").length);
+        document.querySelectorAll(".cell").forEach((cell) => {
+          const row = parseInt(cell.dataset.row);
+          const col = parseInt(cell.dataset.col);
+          const gridSize = Math.sqrt(document.querySelectorAll(".cell").length);
 
-    // Determine sub-grid size
-    const subGridSize = Math.sqrt(gridSize);
+          // Determine sub-grid size
+          const subGridSize = Math.sqrt(gridSize);
 
-    // Update border colors for sub-grid separators
-    if (row % subGridSize === 0) {
-      cell.style.borderTop = `2px solid ${borderColor}`;
-    }
-    if (col % subGridSize === 0) {
-      cell.style.borderLeft = `2px solid ${borderColor}`;
-    }
-    if ((row + 1) % subGridSize === 0) {
-      cell.style.borderBottom = `2px solid ${borderColor}`;
-    }
-    if ((col + 1) % subGridSize === 0) {
-      cell.style.borderRight = `2px solid ${borderColor}`;
-    }
-  });
-}
-
+          // Update border colors for sub-grid separators
+          if (row % subGridSize === 0) {
+            cell.style.borderTop = `2px solid ${borderColor}`;
+          }
+          if (col % subGridSize === 0) {
+            cell.style.borderLeft = `2px solid ${borderColor}`;
+          }
+          if ((row + 1) % subGridSize === 0) {
+            cell.style.borderBottom = `2px solid ${borderColor}`;
+          }
+          if ((col + 1) % subGridSize === 0) {
+            cell.style.borderRight = `2px solid ${borderColor}`;
+          }
+        });
+      }
 
       function updateGrid(puzzle) {
         const size = puzzle.length;
