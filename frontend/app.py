@@ -10,10 +10,6 @@ current_board = []  # 2D array to represent the current Sudoku board
 
 BACKEND_URL = "http://127.0.0.1:8000/sudoku"
 
-# Load the games from the JSON file
-with open('games.json') as f:
-    games_data = json.load(f)["sudoku_games"]
-
 @app.route('/')
 def index():
     # Fetch the current puzzle from the backend
@@ -40,26 +36,13 @@ def new_game():
     # Get the size from the request, default to 4x4 if not provided
     size = int(request.args.get('size', 4))
 
-    # Filter games by the selected difficulty
-    filtered_games = [game for game in games_data if game["difficulty"] == difficulty and game["size"] == size]
+    # request for a new puzzle based on the selected difficulty/size
+    puzzle_data = requests.get(f"{BACKEND_URL}/new_game/", params={"difficulty": difficulty, "size": size}).json()
     
-    # Log when no games are found for debugging purposes
-    if not filtered_games:
-        print(f"No games found for difficulty '{difficulty}' and size {size}.")
-        return jsonify({"error": f"No games found for difficulty '{difficulty}' and size {size}"}), 404
-   
-    # Choose a random game from the filtered list
-    if filtered_games:
-        game = random.choice(filtered_games)
-        global current_board, HISTORY
-        current_board = game["puzzle"]
-        HISTORY = []  # Reset move history when a new game is loaded
-        return jsonify({
-            "puzzle": game["puzzle"],
-            "solution": game["solution"]
-        })
-    else:
-        return jsonify({"error": "No games found for the selected difficulty"}), 404
-
+    global current_board, HISTORY
+    current_board = puzzle_data["puzzle"]  # Update the current board
+    HISTORY = []  # Reset move history for the new game
+    return jsonify({"puzzle": puzzle_data["puzzle"]})
+        
 if __name__ == '__main__':
     app.run(debug=True)
