@@ -10,6 +10,18 @@ current_board = []  # 2D array to represent the current Sudoku board
 
 BACKEND_URL = "http://127.0.0.1:8000/sudoku"
 
+#Jonathan
+#HISTORY will be a list of moves with this data
+class Move:
+    def __init__(self, row, col, value, correct):
+        self.row = row
+        self.col = col
+        self.value = value
+        self.correct = correct
+
+    def __repr__(self):
+        return f"Move(row={self.row}, col={self.col}, value={self.value}, correct={self.correct})"
+
 @app.route('/')
 def index():
     # Fetch the current puzzle from the backend
@@ -43,6 +55,36 @@ def new_game():
     current_board = puzzle_data["puzzle"]  # Update the current board
     HISTORY = []  # Reset move history for the new game
     return jsonify({"puzzle": puzzle_data["puzzle"]})
+
+#Jonathan
+@app.route('/isCorrect', methods=['POST'])
+def isCorrect():
+    row = request.json.get("row")
+    col = request.json.get("col")
+    userValue = request.json.get("value")
+    response = requests.post(f"{BACKEND_URL}/is_correct/", json={"row": row, "col": col, "userValue": userValue})
+    response_data = response.json()
+    isCorrect = response_data.get("correct")
+    move = Move(int(row), int(col), int(userValue), isCorrect)
+    HISTORY.append(move)
+    return jsonify(response.json())
+
+#Jonathan
+@app.route('/undoUntilCorrect', methods=['POST'])
+def undoUntilCorrect():
+    first_wrong = 0
+    for index, move in enumerate(HISTORY):
+        if not move.correct:
+            first_wrong = index
+            break
+    for index in range(len(HISTORY) - 1, first_wrong - 1, -1):
+        move = HISTORY[index]
+        current_board[move.row][move.col] = 0
+        HISTORY.pop()
+    return jsonify({
+        "puzzle": current_board,
+        "index": first_wrong
+    })
         
 if __name__ == '__main__':
     app.run(debug=True)

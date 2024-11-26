@@ -49,6 +49,7 @@
       <button onclick="checkSolution()">Check solution</button>
       <button onclick="newGame()">Create new game</button>
       <button onclick="undoMove()">Undo</button>
+      <button onclick="undoUntilCorrect()">Undo Until Correct</button>
     <!--  
       <button onclick="getSpecificHint">Get Specific Hint</button>
       <button onclick="getRandomHint">Get Random Hint</button>
@@ -101,31 +102,30 @@
         validateBoard(); // Re-validate the board after undoing the move
       }
 
-      function undoUntilCorrect() {
-        if (moveHistory.length === 0) {
-          alert("No moves to undo.");
-          return;
+      async function undoUntilCorrect() {
+        const response = await fetch(`/undoUntilCorrect`, {
+          method: "POST", // Use POST method
+          headers: {
+              "Content-Type": "application/json", // Include the Content-Type header
+          },
+          body: JSON.stringify({}),
+        });
+
+        const data = await response.json(); 
+        const first_wrong = data.index;   
+        const puzzle = data.puzzle;
+        console.log(puzzle);
+        updateGrid(puzzle);
+
+        for (let index = moveHistory.length - 1; index >= first_wrong; index--) {
+          moveHistory.pop();
         }
 
-        // Filter out moves where `correct` is false
-        for (let i = moveHistory.length - 1; i >= 0; i--) {
-          if (moveHistory[i].correct === false) {
-            const move = moveHistory[i];
-
-            // Update the game board based on the move
-            const cell = document.querySelector(
-              `.cell[data-row="${move.row}"][data-col="${move.col}"]`
-            );
-            if (cell) {
-              cell.value = move.previousValue || ""; // Reset the cell to its previous value
-            }
-
-            // Remove the entry from moveHistory
-            moveHistory.splice(i, 1);
-
-            validateBoard();
-          }
-        }
+        // Reset the mistake counter
+        mistakeCount = 0;
+        document.getElementById(
+          "mistake-counter"
+        ).textContent = `Mistakes: ${mistakeCount}/3`;
       }
 
       /*
@@ -385,7 +385,7 @@
         });
       });
 
-      function selectNumber(num) {
+      async function selectNumber(num) {
         if (selectedCell) {
           //selectedCell.value = num;
           // Store the previous value of the cell before changing it
@@ -394,13 +394,28 @@
           // Update the cell with the new number
           selectedCell.value = num;
 
+          userRow = selectedCell.dataset.row;
+          userCol = selectedCell.dataset.col;
+
+          //Correct field - Jonathan
+          const response = await fetch("/isCorrect", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ row: userRow, col: userCol, value: num }),
+          });
+
+          const result = await response.json();
+
+          console.log(result.correct)
+
           // Record the move in the history if the previous value was empty or different
           if (!previousValue || previousValue !== num.toString()) {
             moveHistory.push({
-              row: selectedCell.dataset.row,
-              col: selectedCell.dataset.col,
+              row: userRow,
+              col: userCol,
               previousValue: previousValue, // Save the previous value for accurate undo
               newValue: num,
+              correct: result.correct
             });
           }
 
