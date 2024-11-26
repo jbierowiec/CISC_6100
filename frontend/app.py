@@ -10,8 +10,8 @@ current_board = []  # 2D array to represent the current Sudoku board
 
 BACKEND_URL = "http://127.0.0.1:8000/sudoku"
 
-#Jonathan
-#HISTORY will be a list of moves with this data
+# Jonathan
+# HISTORY will be a list of moves with this data
 class Move:
     def __init__(self, row, col, value, correct):
         self.row = row
@@ -22,24 +22,28 @@ class Move:
     def __repr__(self):
         return f"Move(row={self.row}, col={self.col}, value={self.value}, correct={self.correct})"
 
+# Jan
 @app.route('/')
 def index():
     # Fetch the current puzzle from the backend
     puzzle = requests.get(f"{BACKEND_URL}/get_puzzle/").json()
-    global current_board
+    global current_board, current_solution
     current_board = puzzle["puzzle"]  # Initialize the current board with the puzzle
+    current_solution = puzzle["solution"]
     return render_template(
         'index.html',
         puzzle=puzzle["puzzle"],
         solution=puzzle["solution"]  # Pass the solution to the template
     )
 
+# Jan
 @app.route('/check_solution', methods=['POST'])
 def check_solution():
     solution = request.json.get("solution")
     response = requests.post(f"{BACKEND_URL}/check_solution/", json={"solution": solution})
     return jsonify(response.json())
 
+# Jan
 @app.route('/new_game', methods=['GET'])
 def new_game():
     # Get the difficulty from the request
@@ -56,7 +60,23 @@ def new_game():
     HISTORY = []  # Reset move history for the new game
     return jsonify({"puzzle": puzzle_data["puzzle"]})
 
-#Jonathan
+# Jan
+@app.route('/get_hint', methods=['POST'])
+def get_hint():
+   data = request.json
+   row = data.get("row")
+   col = data.get("col")
+
+   if row is None or col is None:
+       return jsonify({"error": "Invalid row or column"}), 400
+
+   try:
+       hint_value = current_solution[row][col]
+       return jsonify({"hint": hint_value})
+   except IndexError:
+       return jsonify({"error": "Invalid cell position"}), 400
+
+# Jonathan
 @app.route('/isCorrect', methods=['POST'])
 def isCorrect():
     row = request.json.get("row")
@@ -70,7 +90,7 @@ def isCorrect():
     HISTORY.append(move)
     return jsonify(response.json())
 
-#Jonathan
+# Jonathan
 @app.route('/undoUntilCorrect', methods=['POST'])
 def undoUntilCorrect():
     global HISTORY

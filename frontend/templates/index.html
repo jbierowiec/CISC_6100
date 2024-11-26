@@ -50,15 +50,12 @@
       <button onclick="newGame()">Create new game</button>
       <button onclick="undoMove()">Undo</button>
       <button onclick="undoUntilCorrect()">Undo Until Correct</button>
-    <!--  
-      <button onclick="getSpecificHint">Get Specific Hint</button>
-      <button onclick="getRandomHint">Get Random Hint</button>
-      <button onclick="undoUntilCorrect()">Undo Until Correct</button>
+      <button onclick="getHint()">Get Specific Hint</button>
+      <!-- 
       <button id="set-note-button" onclick="toggleSetNote()">
         Set Note: Off
       </button>
     --></div>
-
     <!-- Loss message modal -->
     <div
       id="loss-message"
@@ -79,8 +76,71 @@
     </div>
 
     <script>
-      const puzzleSize = document.getElementById("puzzleSize").value;
 
+      const puzzleSize = document.getElementById("puzzleSize").value;
+      const maxMistakes = 3;
+      let mistakeCount = 0;
+      let selectedCell = null;
+      let gameSolved = false;
+      let moveHistory = [];
+      let timerInterval;
+      let seconds = 0;
+      let isPaused = false;
+
+      // Jan
+      // Function to get a hint
+      function getHint() {
+        if (selectedCell) {
+          const row = parseInt(selectedCell.dataset.row);
+          const col = parseInt(selectedCell.dataset.col);
+
+          // Call the getSpecificHint function with the row and column
+          getSpecificHint(row, col);
+        } else {
+          alert("Please select a cell first.");
+        }
+      }
+
+      // Jan
+      // Function to get a specifc hint
+      async function getSpecificHint(row, col) {
+        try {
+          // Call the backend to get the solution for the specific cell
+          const response = await fetch(`/get_hint`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ row: row, col: col }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch hint from the server");
+          }
+
+          const result = await response.json();
+
+          if (result.hint !== undefined) {
+            // Fill the cell with the hint value
+            const cell = document.querySelector(
+              `.cell[data-row="${row}"][data-col="${col}"]`
+            );
+            if (cell && !cell.disabled) {
+              cell.value = result.hint;
+              alert(
+                `Hint for cell (${row + 1}, ${col + 1}) is: ${result.hint}`
+              );
+            } else {
+              alert("This cell is already filled or disabled.");
+            }
+          } else {
+            alert("No hint available for this cell.");
+          }
+        } catch (error) {
+          console.error("Error fetching hint:", error);
+          alert("Unable to retrieve hint. Please try again.");
+        }
+      }
+
+      // Jan 
       // Function to undo the last move
       function undoMove() {
         if (moveHistory.length === 0) {
@@ -102,22 +162,28 @@
         validateBoard(); // Re-validate the board after undoing the move
       }
 
+      // Jonathan
+      // Function to undo until the last correct state of the game
       async function undoUntilCorrect() {
         const response = await fetch(`/undoUntilCorrect`, {
           method: "POST", // Use POST method
           headers: {
-              "Content-Type": "application/json", // Include the Content-Type header
+            "Content-Type": "application/json", // Include the Content-Type header
           },
           body: JSON.stringify({}),
         });
 
-        const data = await response.json(); 
-        const first_wrong = data.index;   
+        const data = await response.json();
+        const first_wrong = data.index;
         const puzzle = data.puzzle;
         console.log(puzzle);
         updateGrid(puzzle);
 
-        for (let index = moveHistory.length - 1; index >= first_wrong; index--) {
+        for (
+          let index = moveHistory.length - 1;
+          index >= first_wrong;
+          index--
+        ) {
           moveHistory.pop();
         }
 
@@ -127,43 +193,6 @@
           "mistake-counter"
         ).textContent = `Mistakes: ${mistakeCount}/3`;
       }
-
-      /*
-      document.querySelectorAll(".cell").forEach((cell) => {
-        // Listen for direct keyboard input in each cell
-        cell.addEventListener("input", () => {
-          const row = cell.dataset.row;
-          const col = cell.dataset.col;
-          const newValue = cell.value;
-
-          // Only record if the input is a valid number between 1 and 4
-          if (["1", "2", "3", "4"].includes(newValue)) {
-            // Get the previous value before updating it
-            const previousValue = cell.dataset.previousValue || "";
-
-            const correct = current_solution[row][col] == newValue;
-
-            // Record the move
-            moveHistory.push({
-              row: row,
-              col: col,
-              previousValue: previousValue, // Store the previous value
-              newValue: newValue,
-              correct: correct, //add a correct field so we can easily check if a move is correct
-            });
-            console.log("move made");
-
-            // Update `previousValue` data attribute to the current value for next time
-            cell.dataset.previousValue = newValue;
-
-            validateBoard(); // Re-validate the board after each input
-          } else {
-            cell.value = ""; // Clear invalid input
-            alert("Only values 1, 2, 3, or 4 are allowed.");
-          }
-        });
-      });
-      */
 
       document.querySelectorAll(".cell").forEach((cell) => {
         // Listen for direct keyboard input in each cell
@@ -218,9 +247,8 @@
         });
       });
 
-      let mistakeCount = 0;
-      const maxMistakes = 3;
-
+      // Jan
+      // Function to increment a mistake counter
       function incrementMistakeCounter() {
         mistakeCount++;
         document.getElementById(
@@ -232,6 +260,8 @@
         }
       }
 
+      // Jan
+      // Function to trigger the game lost message
       function triggerLoss() {
         // Stop the timer
         stopTimer();
@@ -269,12 +299,16 @@
         }, 1000);
       }
 
+      // Jan
+      // Function to disable the board
       function disableBoard() {
         document.querySelectorAll(".cell").forEach((cell) => {
           cell.disabled = true;
         });
       }
 
+      // Jan
+      // Function to resent the game board
       function resetGameBoard() {
         newGame();
 
@@ -284,7 +318,8 @@
         ).textContent = `Mistakes: 0/3`;
       }
 
-      // Update the validation logic to count mistakes
+      // Jan
+      // Function to validate conditions of the board
       function validateBoard() {
         const gridSize = Math.sqrt(document.querySelectorAll(".cell").length);
         const squareSize = Math.sqrt(gridSize);
@@ -326,6 +361,8 @@
         });
       });
 
+      // Jan
+      // Function to check if there is a dulicate number in a row
       function hasDuplicateInRow(row, col, value, gridSize) {
         for (let c = 0; c < gridSize; c++) {
           if (c !== col) {
@@ -340,6 +377,8 @@
         return false;
       }
 
+      // Jan
+      // Function to check if there is a duplicate number in a column
       function hasDuplicateInColumn(row, col, value, gridSize) {
         for (let r = 0; r < gridSize; r++) {
           if (r !== row) {
@@ -354,6 +393,8 @@
         return false;
       }
 
+      // Jan
+      // Function to check if there is a duplicate number in a 2x2, 3x3 or 4x4 square for the respective 4x4, 9x9, and 16x16 grids
       function hasDuplicateInSquare(row, col, value, squareSize) {
         const startRow = Math.floor(row / squareSize) * squareSize;
         const startCol = Math.floor(col / squareSize) * squareSize;
@@ -372,8 +413,6 @@
         return false;
       }
 
-      let selectedCell = null;
-
       document.querySelectorAll(".cell").forEach((cell) => {
         // Add event listener to enforce a single character and validate input
         cell.addEventListener("input", () => {
@@ -385,6 +424,8 @@
         });
       });
 
+      // Jan
+      // Function to select a number from the number buttons and input it into a cell
       async function selectNumber(num) {
         if (selectedCell) {
           //selectedCell.value = num;
@@ -397,7 +438,7 @@
           userRow = selectedCell.dataset.row;
           userCol = selectedCell.dataset.col;
 
-          //Correct field - Jonathan
+          // Correct field - Jonathan
           const response = await fetch("/isCorrect", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -406,7 +447,7 @@
 
           const result = await response.json();
 
-          console.log(result.correct)
+          console.log(result.correct);
 
           // Record the move in the history if the previous value was empty or different
           if (!previousValue || previousValue !== num.toString()) {
@@ -415,7 +456,7 @@
               col: userCol,
               previousValue: previousValue, // Save the previous value for accurate undo
               newValue: num,
-              correct: result.correct
+              correct: result.correct,
             });
           }
 
@@ -428,15 +469,15 @@
         }
       }
 
-      let gameSolved = false; // Flag to track if the game is solved
-      let moveHistory = [];
-
+      // Jan 
+      // Function to check solution of the board
       async function checkSolution() {
+        const puzzleSize = parseInt(document.getElementById("puzzleSize").value);
         const solution = [];
 
-        for (let i = 0; i < 4; i++) {
+        for (let i = 0; i < puzzleSize; i++) {
           const row = [];
-          for (let j = 0; j < 4; j++) {
+          for (let j = 0; j < puzzleSize; j++) {
             const cell = document.querySelector(
               `.cell[data-row="${i}"][data-col="${j}"]`
             );
@@ -467,6 +508,8 @@
         }
       }
 
+      // Jan
+      // Function to load a new game on the screen
       async function newGame() {
         const difficulty = document.getElementById("difficulty").value;
 
@@ -490,6 +533,8 @@
         moveHistory = [];
       }
 
+      // Jan
+      // Function to give the border colors of the grids & creating a checker pattern
       function updateBorders() {
         const isDarkMode = document.body.classList.contains("dark-mode");
         const borderColor = isDarkMode ? "rgb(255, 196, 33)" : "black";
@@ -518,6 +563,8 @@
         });
       }
 
+      // Jan
+      // Function that updates the status of the grid
       function updateGrid(puzzle) {
         const size = puzzle.length;
         const grid = document.getElementById("sudoku-grid");
@@ -573,6 +620,8 @@
         enforceMaxLength();
         updateBorders();
       }
+
+      // Jan
       // Function to generate number buttons based on the grid size
       function updateNumberButtons(size) {
         const buttonContainer = document.querySelector(".number-controls");
@@ -590,8 +639,8 @@
         }
       }
 
-      let isPaused = false; // Track the pause state
-
+      // Jan
+      // Function to pause the game
       function togglePause() {
         const pauseButton = document.getElementById("pause-button");
         const cells = document.querySelectorAll(".cell");
@@ -640,10 +689,8 @@
         }
       }
 
-      // Timer Functions Setup
-      let timerInterval;
-      let seconds = 0;
-
+      // Jan 
+      // Function to start the timer
       function startTimer() {
         clearInterval(timerInterval); // Ensure no duplicate intervals
         timerInterval = setInterval(() => {
@@ -652,11 +699,13 @@
         }, 1000);
       }
 
+      // Jan
       // Function to stop the timer
       function stopTimer() {
         clearInterval(timerInterval);
       }
 
+      // Jan
       // Function to reset the timer
       function resetTimer() {
         clearInterval(timerInterval);
@@ -666,6 +715,7 @@
         startTimer();
       }
 
+      // Jan
       // Helper function to format time in HH:MM:SS format
       function formatTime(totalSeconds) {
         const hours = Math.floor(totalSeconds / 3600);
@@ -691,6 +741,7 @@
         }
       });
 
+      // Jan
       // Light & Dark Mode Button Functionality
       function toggleTheme() {
         const body = document.body;
@@ -711,6 +762,8 @@
         updateBorders();
       }
 
+      // Jan
+      // Function to enforece the input of a cell to be only one value
       function enforceMaxLength() {
         const cells = document.querySelectorAll(".cell"); // Select all input cells
         cells.forEach((cell) => {
