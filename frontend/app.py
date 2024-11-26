@@ -73,9 +73,8 @@ def isCorrect():
 #Jonathan
 @app.route('/undoUntilCorrect', methods=['POST'])
 def undoUntilCorrect():
-    print(current_board)
     global HISTORY
-    first_wrong = 0
+    first_wrong = len(HISTORY) + 1
     # Find the index of the first incorrect move
     for index, move in enumerate(HISTORY):
         if not move.correct:
