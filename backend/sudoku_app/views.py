@@ -72,3 +72,19 @@ def new_game(request):
         return JsonResponse({
             "error": f"No games found for difficulty '{difficulty}' and size {size}."
         }, status=404)
+
+#Jonathan
+@csrf_exempt
+def is_correct(request):
+    data = json.loads(request.body)  # Define 'data'
+    user_row = int(data.get("row"))  # Convert to integer
+    user_col = int(data.get("col"))  # Convert to integer
+    user_value = json.loads(request.body).get("userValue")
+    if(current_puzzle.solution[user_row][user_col] == user_value):
+        return JsonResponse({
+            "correct": True
+        })
+    else:
+        return JsonResponse({
+            "correct": False
+        })
