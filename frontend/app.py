@@ -66,25 +66,37 @@ def isCorrect():
     response_data = response.json()
     isCorrect = response_data.get("correct")
     move = Move(int(row), int(col), int(userValue), isCorrect)
+    current_board[move.row][move.col] = move.value
     HISTORY.append(move)
     return jsonify(response.json())
 
 #Jonathan
 @app.route('/undoUntilCorrect', methods=['POST'])
 def undoUntilCorrect():
+    print(current_board)
+    global HISTORY
     first_wrong = 0
+    # Find the index of the first incorrect move
     for index, move in enumerate(HISTORY):
         if not move.correct:
             first_wrong = index
             break
-    for index in range(len(HISTORY) - 1, first_wrong - 1, -1):
+
+    # Reset the spots on the board for moves after the first_wrong index
+    for index in range(first_wrong, len(HISTORY)):
         move = HISTORY[index]
-        current_board[move.row][move.col] = 0
-        HISTORY.pop()
+        current_board[move.row][move.col] = 0  # Reset the spot to 0
+
+    # Keep only the moves up to the first_wrong index in HISTORY
+    HISTORY = HISTORY[:first_wrong]
+
+    print(current_board)
+
     return jsonify({
         "puzzle": current_board,
         "index": first_wrong
     })
+
         
 if __name__ == '__main__':
     app.run(debug=True)
