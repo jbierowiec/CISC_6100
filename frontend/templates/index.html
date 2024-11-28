@@ -14,21 +14,21 @@
   <body>
     <h1>Sudoku Game</h1>
 
-    <!-- Top Button Controls: Timer, Difficulty, Size, and Dark/Light Mode -->
+    <!-- Top controls: Timer, Difficulty, and Dark/Light Mode -->
     <div class="top-controls">
       <div id="timer">00:00:00</div>
       <button id="pause-button" onclick="togglePause()">Stop</button>
 
       <label for="difficulty">Difficulty:</label>
       <select id="difficulty">
-        <option value="easy" selected>Easy</option>
+        <option value="easy">Easy</option>
         <option value="medium">Medium</option>
         <option value="hard">Hard</option>
       </select>
 
       <label for="puzzleSize">Puzzle Size:</label>
       <select id="puzzleSize">
-        <option value="4" selected>4x4</option>
+        <option value="4">4x4</option>
         <option value="9">9x9</option>
         <option value="16">16x16</option>
       </select>
@@ -44,23 +44,18 @@
     <!-- Number input buttons -->
     <div class="number-controls"></div>
 
-    <!-- Bottom Button Controls: Undo/Undo Until Correct, Set Note/Check Solution/New Game, Get Specific Hint/Get Random Hint -->
+    <!-- Bottom controls: Check Solution, New Game, Undo, Get Hint -->
     <div class="bottom-controls">
-      <div class="button-column">
-        <button onclick="undoMove()" style="grid-row: span 2">Undo Move</button>
-        <button onclick="undoUntilCorrect()">Undo Until Correct</button>
-      </div>
-      <div class="button-column">
-        <!--<button onclick="toggleSetNote()">Set Note: Off</button>-->
-        <button onclick="checkSolution()">Check Solution</button>
-        <button onclick="newGame()">New Game</button>
-      </div>
-      <div class="button-column">
-        <button onclick="getHint()">Get Specific Hint</button>
-        <!--<button onclick="getRandomHint()">Get Random Hint</button>-->
-      </div>
-    </div>
-
+      <button onclick="checkSolution()">Check solution</button>
+      <button onclick="newGame()">Create new game</button>
+      <button onclick="undoMove()">Undo</button>
+      <button onclick="undoUntilCorrect()">Undo Until Correct</button>
+      <button onclick="getHint()">Get Specific Hint</button>
+      <!-- 
+      <button id="set-note-button" onclick="toggleSetNote()">
+        Set Note: Off
+      </button>
+    --></div>
     <!-- Loss message modal -->
     <div
       id="loss-message"
@@ -81,115 +76,16 @@
     </div>
 
     <script>
-      /* VARIABLE DECLARATIONS */
 
-      const maxMistakes = 3; // maximum mistakes that the user can make with respect to having a value in the same square, row, or column
-      let mistakeCount = 0; // mistake counter starts with 0
-      let selectedCell = null; // a selected cell has an initial value of null
-      let gameSolved = false; // every game starts out with a condition of not being solved
-      let moveHistory = []; // move history array
-      let timerInterval; // time interval variable
-      let seconds = 0; // seconds set to 0
-      let isPaused = false; // games start with time not paused
-      newGame(); // a game is displayed on the screen by default as opposed to just the buttons
-
-      /* GAME BUTTONS */
-
-      // Jan
-      // Function to undo the last move
-      function undoMove() {
-        if (moveHistory.length === 0) {
-          alert("No moves to undo.");
-          return;
-        }
-
-        const lastMove = moveHistory.pop(); // remove moves made by the user from the moveHistory array
-        const cell = document.querySelector(
-          `.cell[data-row="${lastMove.row}"][data-col="${lastMove.col}"]`
-        );
-        if (cell) {
-          cell.value = lastMove.previousValue || ""; // replace a cell with an inputed value to be set to nothing
-        }
-
-        validateBoard();
-      }
-
-      // Jonathan
-      // Function to undo until the last correct state of the game
-      async function undoUntilCorrect() {
-        const response = await fetch(`/undoUntilCorrect`, {
-          method: "POST", // use the POST method
-          headers: {
-            "Content-Type": "application/json", // include the Content-Type header
-          },
-          body: JSON.stringify({}),
-        });
-
-        const data = await response.json();
-        const first_wrong = data.index;
-        const puzzle = data.puzzle;
-        console.log(puzzle);
-        updateGrid(puzzle);
-
-        for (
-          // for loop looping through the length of the moveHistory array and finding the first incorrect value
-          let index = moveHistory.length - 1;
-          index >= first_wrong;
-          index--
-        ) {
-          moveHistory.pop();
-        }
-
-        mistakeCount = 0; // reset the mistake counter
-        document.getElementById(
-          "mistake-counter"
-        ).textContent = `Mistakes: ${mistakeCount}/3`;
-      }
-
-      /* TODO: SET NOTE MODE BUTTON */
-
-      // Jan
-      // Function to check solution of the board
-      async function checkSolution() {
-        const puzzleSize = parseInt(
-          document.getElementById("puzzleSize").value
-        );
-        const solution = [];
-
-        for (let i = 0; i < puzzleSize; i++) {
-          // for loops looping through the size of the puzzle, and recording the inputs the user makes
-          const row = [];
-          for (let j = 0; j < puzzleSize; j++) {
-            const cell = document.querySelector(
-              `.cell[data-row="${i}"][data-col="${j}"]`
-            );
-            if (cell) {
-              const value = parseInt(cell.value) || 0;
-              row.push(value);
-            } else {
-              row.push(0);
-            }
-          }
-          solution.push(row);
-        }
-
-        const response = await fetch("/check_solution", {
-          // call check_solution to check if the solution from the backend data matches all the user inputs
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ solution: solution }),
-        });
-
-        const result = await response.json();
-
-        if (result.status === "correct") {
-          alert("Sudoku has been solved!");
-          stopTimer(); // stop the timer when the solution is correct
-          gameSolved = true; // set the flag to indicate the game is solved
-        } else {
-          alert("Incorrect solution.");
-        }
-      }
+      const puzzleSize = document.getElementById("puzzleSize").value;
+      const maxMistakes = 3;
+      let mistakeCount = 0;
+      let selectedCell = null;
+      let gameSolved = false;
+      let moveHistory = [];
+      let timerInterval;
+      let seconds = 0;
+      let isPaused = false;
 
       // when the html page is loaded, generate the random puzzle
       document.addEventListener("DOMContentLoaded", function() {
@@ -208,6 +104,7 @@
           const row = parseInt(selectedCell.dataset.row);
           const col = parseInt(selectedCell.dataset.col);
 
+          // Call the getSpecificHint function with the row and column
           getSpecificHint(row, col);
         } else {
           alert("Please select a cell first.");
@@ -218,8 +115,8 @@
       // Function to get a specifc hint
       async function getSpecificHint(row, col) {
         try {
+          // Call the backend to get the solution for the specific cell
           const response = await fetch(`/get_hint`, {
-            // call get hint from the backend
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ row: row, col: col }),
@@ -232,7 +129,7 @@
           const result = await response.json();
 
           if (result.hint !== undefined) {
-            // logic to check if cell is prefilled/empty/or if no hint is available
+            // Fill the cell with the hint value
             const cell = document.querySelector(
               `.cell[data-row="${row}"][data-col="${col}"]`
             );
@@ -253,12 +150,186 @@
         }
       }
 
-      /* TODO: GET RANDOM HINT BUTTON */
+      // Jan 
+      // Function to undo the last move
+      function undoMove() {
+        if (moveHistory.length === 0) {
+          alert("No moves to undo.");
+          return;
+        }
 
-      /* FUNCTIONS TO VALIDATE THE BOARD */
+        // Get the last move from the history
+        const lastMove = moveHistory.pop();
+
+        // Find the cell and set it back to empty
+        const cell = document.querySelector(
+          `.cell[data-row="${lastMove.row}"][data-col="${lastMove.col}"]`
+        );
+        if (cell) {
+          cell.value = lastMove.previousValue || ""; // Clear the cell's value
+        }
+
+        validateBoard(); // Re-validate the board after undoing the move
+      }
+
+      // Jonathan
+      // Function to undo until the last correct state of the game
+      async function undoUntilCorrect() {
+        const response = await fetch(`/undoUntilCorrect`, {
+          method: "POST", // Use POST method
+          headers: {
+            "Content-Type": "application/json", // Include the Content-Type header
+          },
+          body: JSON.stringify({}),
+        });
+
+        const data = await response.json();
+        const first_wrong = data.index;
+        const puzzle = data.puzzle;
+        console.log(puzzle);
+        updateGrid(puzzle);
+
+        for (
+          let index = moveHistory.length - 1;
+          index >= first_wrong;
+          index--
+        ) {
+          moveHistory.pop();
+        }
+
+        // Reset the mistake counter
+        mistakeCount = 0;
+        document.getElementById(
+          "mistake-counter"
+        ).textContent = `Mistakes: ${mistakeCount}/3`;
+      }
+
+      document.querySelectorAll(".cell").forEach((cell) => {
+        // Listen for direct keyboard input in each cell
+        cell.addEventListener("input", () => {
+          const row = cell.dataset.row;
+          const col = cell.dataset.col;
+          const newValue = cell.value;
+
+          // Get the grid size for validation
+          const gridSize = Math.sqrt(document.querySelectorAll(".cell").length);
+
+          // Validate the input (e.g., number within range)
+          if (
+            newValue &&
+            !isNaN(newValue) &&
+            newValue >= 1 &&
+            newValue <= gridSize
+          ) {
+            // Capture the previous value from the cell's dataset
+            const previousValue = cell.dataset.previousValue || "";
+
+            // Determine if the new value is correct
+            const correct = current_solution[row][col] == newValue;
+
+            // Add the move to the move history
+            moveHistory.push({
+              row: row,
+              col: col,
+              previousValue: previousValue,
+              newValue: newValue,
+              correct: correct,
+            });
+
+            console.log("Move recorded:", moveHistory);
+
+            // Update the `previousValue` attribute for next time
+            cell.dataset.previousValue = newValue;
+
+            // Revalidate the board after the move
+            validateBoard();
+          } else {
+            cell.value = ""; // Clear invalid input
+            alert(`Please enter a number between 1 and ${gridSize}.`);
+          }
+        });
+      });
+
+      document.querySelectorAll(".cell").forEach((cell) => {
+        // Add event listener to validate the board after each input
+        cell.addEventListener("input", () => {
+          validateBoard(); // Run validation after each input
+        });
+      });
 
       // Jan
-      // Function to validate conditions of the board based on smaller squares, rows and columns
+      // Function to increment a mistake counter
+      function incrementMistakeCounter() {
+        mistakeCount++;
+        document.getElementById(
+          "mistake-counter"
+        ).textContent = `Mistakes: ${mistakeCount}/3`;
+
+        if (mistakeCount === maxMistakes) {
+          triggerLoss();
+        }
+      }
+
+      // Jan
+      // Function to trigger the game lost message
+      function triggerLoss() {
+        // Stop the timer
+        stopTimer();
+
+        // Show the loss message
+        const lossMessage = document.getElementById("loss-message");
+        lossMessage.style.display = "block";
+
+        const buttons = document.querySelectorAll("button");
+        buttons.forEach((button) => {
+          button.disabled = true;
+        });
+
+        // Disable board inputs
+        disableBoard();
+
+        let timer = 10; // Countdown timer
+        const timerElement = document.getElementById("retry-timer");
+        const interval = setInterval(() => {
+          timerElement.textContent = --timer;
+          if (timer === 0) {
+            clearInterval(interval);
+
+            buttons.forEach((button) => {
+              button.disabled = false;
+            });
+
+            resetGameBoard();
+            lossMessage.style.display = "none";
+            mistakeCount = 0;
+            document.getElementById(
+              "mistake-counter"
+            ).textContent = `Mistakes: 0/3`;
+          }
+        }, 1000);
+      }
+
+      // Jan
+      // Function to disable the board
+      function disableBoard() {
+        document.querySelectorAll(".cell").forEach((cell) => {
+          cell.disabled = true;
+        });
+      }
+
+      // Jan
+      // Function to resent the game board
+      function resetGameBoard() {
+        newGame();
+
+        mistakeCount = 0;
+        document.getElementById(
+          "mistake-counter"
+        ).textContent = `Mistakes: 0/3`;
+      }
+
+      // Jan
+      // Function to validate conditions of the board
       function validateBoard() {
         const gridSize = Math.sqrt(document.querySelectorAll(".cell").length);
         const squareSize = Math.sqrt(gridSize);
@@ -277,7 +348,6 @@
 
             if (value) {
               if (
-                // calls helper functions to validate the board
                 hasDuplicateInRow(row, col, value, gridSize) ||
                 hasDuplicateInColumn(row, col, value, gridSize) ||
                 hasDuplicateInSquare(row, col, value, squareSize)
@@ -290,10 +360,16 @@
         }
 
         if (hasMistakes) {
-          // if there are mistakes then the mistake counter is incremented
           incrementMistakeCounter();
         }
       }
+
+      // Update event listeners
+      document.querySelectorAll(".cell").forEach((cell) => {
+        cell.addEventListener("input", () => {
+          validateBoard();
+        });
+      });
 
       // Jan
       // Function to check if there is a dulicate number in a row
@@ -347,185 +423,44 @@
         return false;
       }
 
-      /* TIMER FUNCTIONS */
-
-      // Jan
-      // Function to pause the game
-      function togglePause() {
-        const pauseButton = document.getElementById("pause-button");
-        const cells = document.querySelectorAll(".cell");
-        const buttons = document.querySelectorAll("button");
-
-        if (isPaused) {
-          // isPaused is false by default
-          pauseButton.textContent = "Stop"; // resume the game
-
-          cells.forEach((cell) => {
-            cell.style.filter = ""; // remove blur
-            cell.disabled = cell.dataset.preFilled === "true"; // disable only pre-filled cells
-          });
-
-          buttons.forEach((button) => {
-            // enable all buttons except the pause button condition
-            button.disabled = false;
-          });
-
-          startTimer(); // resume the timer
-          isPaused = false;
-        } else if (!isPaused) {
-          pauseButton.textContent = "Play"; // pause the game
-
-          cells.forEach((cell) => {
-            cell.style.filter = "blur(5px)"; // apply blur
-            cell.disabled = true; // disable all cell interactions
-          });
-
-          buttons.forEach((button) => {
-            // disable all buttons except the pause button
-            if (button.id !== "pause-button") {
-              button.disabled = true;
-            }
-          });
-
-          stopTimer(); // pause the timer
-          isPaused = true;
-        }
-      }
-
-      // Jan
-      // Function to start the timer
-      function startTimer() {
-        clearInterval(timerInterval); // ensures no duplicate intervals
-        timerInterval = setInterval(() => {
-          seconds++;
-          document.getElementById("timer").textContent = formatTime(seconds);
-        }, 1000);
-      }
-
-      // Jan
-      // Function to stop the timer
-      function stopTimer() {
-        clearInterval(timerInterval);
-      }
-
-      // Jan
-      // Function to reset the timer
-      function resetTimer() {
-        clearInterval(timerInterval);
-        seconds = 0;
-        document.getElementById("timer").textContent = formatTime(seconds);
-        gameSolved = false; // reset the solved flag when a new game starts
-        startTimer();
-      }
-
-      // Jan
-      // Helper function to format time in HH:MM:SS format
-      function formatTime(totalSeconds) {
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
-          2,
-          "0"
-        )}:${String(seconds).padStart(2, "0")}`;
-      }
-
-      /* MISTAKE COUNTER & LOSE PAGE FUNCTIONS */
-
-      // Jan
-      // Function to increment a mistake counter
-      function incrementMistakeCounter() {
-        mistakeCount++;
-        document.getElementById(
-          "mistake-counter"
-        ).textContent = `Mistakes: ${mistakeCount}/3`;
-
-        if (mistakeCount === maxMistakes) {
-          // if mistake count is the same number as the maximum mistakes then a loss is triggered
-          triggerLoss();
-        }
-      }
-
-      // Jan
-      // Function to trigger the game lost message
-      function triggerLoss() {
-        stopTimer(); // stop the timer
-
-        const lossMessage = document.getElementById("loss-message"); // loss message displayed on the screen
-        lossMessage.style.display = "block";
-
-        const buttons = document.querySelectorAll("button");
-        buttons.forEach((button) => {
-          button.disabled = true; // all buttons are disabled on the screen
-        });
-
-        disableBoard(); // board inputs are disabled
-
-        let timer = 10; // countdown timer set to 10 seconds enforcing the user to wait
-        const timerElement = document.getElementById("retry-timer");
-        const interval = setInterval(() => {
-          timerElement.textContent = --timer;
-          if (timer === 0) {
-            // all buttons are unabled, the game board is reset, mistake count is reset to 0
-            clearInterval(interval);
-
-            buttons.forEach((button) => {
-              button.disabled = false;
-            });
-
-            resetGameBoard();
-            lossMessage.style.display = "none";
-            mistakeCount = 0;
-            document.getElementById(
-              "mistake-counter"
-            ).textContent = `Mistakes: 0/3`;
+      document.querySelectorAll(".cell").forEach((cell) => {
+        // Add event listener to enforce a single character and validate input
+        cell.addEventListener("input", () => {
+          const validValues = ["1", "2", "3", "4"];
+          if (cell.value.length > 1 || !validValues.includes(cell.value)) {
+            cell.value = ""; // Clear invalid input if length > 1 or value is not 1-4
+            alert("Only values 1, 2, 3, or 4 are allowed.");
           }
-        }, 1000);
-      }
-
-      /* SUPPLEMENTARY FUNCTIONS FOR THE FRONTEND OF THE GAME */
-
-      // Jan
-      // Function to disable the board
-      function disableBoard() {
-        document.querySelectorAll(".cell").forEach((cell) => {
-          cell.disabled = true;
         });
-      }
-
-      // Jan
-      // Function to reset the game board
-      function resetGameBoard() {
-        newGame();
-
-        mistakeCount = 0;
-        document.getElementById(
-          "mistake-counter"
-        ).textContent = `Mistakes: 0/3`;
-      }
+      });
 
       // Jan
       // Function to select a number from the number buttons and input it into a cell
       async function selectNumber(num) {
         if (selectedCell) {
-          const previousValue = selectedCell.value; // store the previous value of the cell before changing it
+          //selectedCell.value = num;
+          // Store the previous value of the cell before changing it
+          const previousValue = selectedCell.value;
 
-          selectedCell.value = num; // update the cell with the new number
+          // Update the cell with the new number
+          selectedCell.value = num;
+
           userRow = selectedCell.dataset.row;
           userCol = selectedCell.dataset.col;
 
+          // Correct field - Jonathan
           const response = await fetch("/isCorrect", {
-            // Correct field - Jonathan
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ row: userRow, col: userCol, value: num }),
           });
 
           const result = await response.json();
+
           console.log(result.correct);
 
+          // Record the move in the history if the previous value was empty or different
           if (!previousValue || previousValue !== num.toString()) {
-            // Record the move in the history if the previous value was empty or different
             moveHistory.push({
               row: userRow,
               col: userCol,
@@ -625,17 +560,19 @@
       // Jan
       // Function to give the border colors of the grids & creating a checker pattern
       function updateBorders() {
-        const isDarkMode = document.body.classList.contains("dark-mode"); // takes into account dark mode as well
+        const isDarkMode = document.body.classList.contains("dark-mode");
         const borderColor = isDarkMode ? "rgb(255, 196, 33)" : "black";
 
         document.querySelectorAll(".cell").forEach((cell) => {
           const row = parseInt(cell.dataset.row);
           const col = parseInt(cell.dataset.col);
           const gridSize = Math.sqrt(document.querySelectorAll(".cell").length);
-          const subGridSize = Math.sqrt(gridSize); // determine sub-grid size
 
+          // Determine sub-grid size
+          const subGridSize = Math.sqrt(gridSize);
+
+          // Update border colors for sub-grid separators
           if (row % subGridSize === 0) {
-            // update border colors for sub-grid separators
             cell.style.borderTop = `2px solid ${borderColor}`;
           }
           if (col % subGridSize === 0) {
@@ -656,14 +593,16 @@
         const size = puzzle.length;
         const grid = document.getElementById("sudoku-grid");
         const subGridSize = Math.sqrt(size);
-        const cellSize = size === 16 ? "30px" : size === 9 ? "40px" : "50px"; // adjusts cells size based on grid size
 
-        grid.style.gridTemplateRows = `repeat(${size}, ${cellSize})`; // sets up CSS grid with the appropriate size
+        const cellSize = size === 16 ? "30px" : size === 9 ? "40px" : "50px"; // Adjust cell size based on grid size
+
+        // Sets up CSS grid with the appropriate size
+        grid.style.gridTemplateRows = `repeat(${size}, ${cellSize})`;
         grid.style.gridTemplateColumns = `repeat(${size}, ${cellSize})`;
-        grid.innerHTML = ""; // clears the existing grid
+        grid.innerHTML = ""; // Clear existing grid
 
+        // Generate cells dynamically
         for (let row = 0; row < size; row++) {
-          // generates cells dynamically
           for (let col = 0; col < size; col++) {
             const cell = document.createElement("input");
             cell.type = "text";
@@ -671,7 +610,8 @@
             cell.dataset.row = row;
             cell.dataset.col = col;
             cell.value = puzzle[row][col] || "";
-            if (puzzle[row][col]) { // marks pre-filled cells
+            if (puzzle[row][col]) {
+              // Mark pre-filled cells
               cell.disabled = true;
               cell.dataset.preFilled = "true";
               cell.style.fontWeight = "bold";
@@ -684,17 +624,19 @@
             grid.appendChild(cell);
           }
         }
-        moveHistory = []; // reset move history
+        moveHistory = []; // Reset move history
 
-        updateNumberButtons(size); // adjusts number buttons based on grid size
-
+        // Adjust number buttons based on grid size
+        updateNumberButtons(size);
+        // Function to handle cell selection (remains largely the same)
         document.querySelectorAll(".cell").forEach((cell) => {
-          // function to handle cell selection (remains largely the same)
           cell.addEventListener("click", () => {
-            document // deselect previously selected cell, if any
+            // Deselect previously selected cell, if any
+            document
               .querySelectorAll(".cell")
               .forEach((c) => c.classList.remove("selected"));
-            cell.classList.add("selected"); // mark the clicked cell as selected
+            // Mark the clicked cell as selected
+            cell.classList.add("selected");
             selectedCell = cell;
           });
         });
@@ -707,11 +649,13 @@
       // Function to generate number buttons based on the grid size
       function updateNumberButtons(size) {
         const buttonContainer = document.querySelector(".number-controls");
-        buttonContainer.innerHTML = ""; // clear existing buttons
-        const maxNumber = size === 16 ? 16 : size === 9 ? 9 : 4; // determine the range of numbers based on grid size
+        buttonContainer.innerHTML = ""; // Clear existing buttons
 
+        // Determine the range of numbers based on grid size
+        const maxNumber = size === 16 ? 16 : size === 9 ? 9 : 4;
+
+        // Generate buttons from 1 to maxNumber
         for (let i = 1; i <= maxNumber; i++) {
-          // generate buttons from 1 to maxNumber
           const button = document.createElement("button");
           button.textContent = i;
           button.onclick = () => selectNumber(i); // Assign the number when clicked
@@ -720,15 +664,118 @@
       }
 
       // Jan
+      // Function to pause the game
+      function togglePause() {
+        const pauseButton = document.getElementById("pause-button");
+        const cells = document.querySelectorAll(".cell");
+        const buttons = document.querySelectorAll("button");
+
+        if (isPaused) {
+          // Resume the game
+          pauseButton.textContent = "Stop";
+
+          // Restore the original state of all cells
+          cells.forEach((cell) => {
+            //cell.style.backgroundColor = ""; // Restore cell background
+            //cell.style.color = ""; // Restore cell text color
+            cell.style.filter = ""; // Remove blur
+            cell.disabled = cell.dataset.preFilled === "true"; // Disable pre-filled cells
+          });
+
+          // Enable all buttons except the pause button
+          buttons.forEach((button) => {
+            button.disabled = false;
+          });
+
+          startTimer(); // Resume the timer
+          isPaused = false;
+        } else if (!isPaused) {
+          // Pause the game
+          pauseButton.textContent = "Play";
+
+          // Blackout all cells
+          cells.forEach((cell) => {
+            //cell.style.backgroundColor = "black"; // Set background to black
+            //cell.style.color = "black"; // Hide cell text
+            cell.style.filter = "blur(5px)"; // Apply blur
+            cell.disabled = true; // Disable all interactions
+          });
+
+          // Disable all buttons except the pause button
+          buttons.forEach((button) => {
+            if (button.id !== "pause-button") {
+              button.disabled = true;
+            }
+          });
+
+          stopTimer(); // Pause the timer
+          isPaused = true;
+        }
+      }
+
+      // Jan 
+      // Function to start the timer
+      function startTimer() {
+        clearInterval(timerInterval); // Ensure no duplicate intervals
+        timerInterval = setInterval(() => {
+          seconds++;
+          document.getElementById("timer").textContent = formatTime(seconds);
+        }, 1000);
+      }
+
+      // Jan
+      // Function to stop the timer
+      function stopTimer() {
+        clearInterval(timerInterval);
+      }
+
+      // Jan
+      // Function to reset the timer
+      function resetTimer() {
+        clearInterval(timerInterval);
+        seconds = 0;
+        document.getElementById("timer").textContent = formatTime(seconds);
+        gameSolved = false; // Reset the solved flag when a new game starts
+        startTimer();
+      }
+
+      // Jan
+      // Helper function to format time in HH:MM:SS format
+      function formatTime(totalSeconds) {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+          2,
+          "0"
+        )}:${String(seconds).padStart(2, "0")}`;
+      }
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          // Tab becomes inactive
+          if (!isPaused) {
+            stopTimer(); // Stop the timer if the game is not paused
+          }
+        } else {
+          // Tab becomes active again
+          if (!isPaused) {
+            startTimer(); // Resume the timer only if the game is not paused
+          }
+        }
+      });
+
+      // Jan
       // Light & Dark Mode Button Functionality
       function toggleTheme() {
         const body = document.body;
         const themeToggleButton = document.getElementById("theme-toggle");
 
-        body.classList.toggle("dark-mode"); // toggle the dark-mode class on the body
+        // Toggle the dark-mode class on the body
+        body.classList.toggle("dark-mode");
 
+        // Update the button text based on the current theme
         if (body.classList.contains("dark-mode")) {
-          // update the button text based on the current theme
           themeToggleButton.textContent = "Light Mode";
           localStorage.setItem("theme", "dark");
         } else {
@@ -742,75 +789,23 @@
       // Jan
       // Function to enforece the input of a cell to be only one value
       function enforceMaxLength() {
-        const cells = document.querySelectorAll(".cell"); // select all input cells
+        const cells = document.querySelectorAll(".cell"); // Select all input cells
         cells.forEach((cell) => {
-          cell.setAttribute("maxlength", "1"); // enforce maxlength
+          cell.setAttribute("maxlength", "1"); // Enforce maxlength
         });
       }
 
-      document.querySelectorAll(".cell").forEach((cell) => {
-        cell.addEventListener("input", () => {
-          // listen for direct keyboard input in each cell
-          const row = cell.dataset.row;
-          const col = cell.dataset.col;
-          const newValue = cell.value;
-          const gridSize = Math.sqrt(document.querySelectorAll(".cell").length); // get the grid size for validation
-
-          if (
-            // validate the input (e.g., number within range)
-            newValue &&
-            !isNaN(newValue) &&
-            newValue >= 1 &&
-            newValue <= gridSize
-          ) {
-            const previousValue = cell.dataset.previousValue || ""; // captures the previous value from the cell's dataset
-            const correct = current_solution[row][col] == newValue; // determines if the new value is correct
-
-            moveHistory.push({
-              // add the move to the move history
-              row: row,
-              col: col,
-              previousValue: previousValue,
-              newValue: newValue,
-              correct: correct,
-            });
-
-            console.log("Move recorded:", moveHistory);
-            cell.dataset.previousValue = newValue; // update the `previousValue` attribute for next time
-
-            validateBoard(); // revalidate the board after the move
-          } else {
-            cell.value = ""; // Clear invalid input
-            alert(`Please enter a number between 1 and ${gridSize}.`);
-          }
-        });
-      });
-
-      document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-          if (!isPaused) {
-            // tab becomes inactive
-            stopTimer(); // stop the timer if the game is not paused
-          }
-        } else {
-          if (!isPaused) {
-            // tab becomes active again
-            startTimer(); // resume the timer only if the game is not paused
-          }
-        }
-      });
-
+      // Start the timer when the window loads
       window.onload = () => {
-        enforceMaxLength(); // enforce maximum length of values per cell
+        enforceMaxLength();
         if (localStorage.getItem("theme") === "dark") {
-          // make sure theme works
           document.body.classList.add("dark-mode");
           document.getElementById("theme-toggle").textContent = "Light Mode";
         } else {
           document.body.classList.add("light-mode");
           document.getElementById("theme-toggle").textContent = "Dark Mode";
         }
-        startTimer(); // start timer on window load
+        startTimer();
       };
     </script>
   </body>
