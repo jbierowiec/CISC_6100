@@ -20,7 +20,7 @@ from django.urls import path, include
 from django.http import HttpResponseRedirect
 
 def redirect_to_sudoku(request):
-    return HttpResponseRedirect('/sudoku/get_puzzle/')
+    return HttpResponseRedirect('/sudoku/')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

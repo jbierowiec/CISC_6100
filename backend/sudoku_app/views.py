@@ -3,24 +3,32 @@ import random
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from sudoku_app.models import SudokuGames
+from sudoku_app.models import Sessions
+from django.shortcuts import render
 
 # Global variable to hold the current puzzle
 current_puzzle = None
 
-def reset_game():
-    global current_puzzle
-    games = SudokuGames.objects.all() # sets to all games in the database
-    current_puzzle = random.choice(games)
-
-# Initialize the first game when the server starts
-reset_game()
+@csrf_exempt # to keep for testing purposes
+def index(request):
+    sessionsTracker = Sessions.objects.all()
+    sessions_data = list(sessionsTracker.values())  # Convert queryset to a list of dictionaries
+    return JsonResponse(sessions_data, safe=False)
 
 @csrf_exempt
 def get_current_puzzle(request):
+    global current_puzzle
+    games = SudokuGames.objects.all() # sets to all games in the database
+    current_puzzle = random.choice(games)
+    
+    # Create a new session for the first game
+    session = Sessions.objects.create(sudoku_game=current_puzzle)
+    
     # Return the current puzzle without changing it
     if current_puzzle:
         return JsonResponse({
-            "id": current_puzzle.id,
+            "session_id": session.id,
+            "puzzle_id": current_puzzle.id,
             "puzzle": current_puzzle.puzzle,
             "solution": current_puzzle.solution,
             "difficulty": current_puzzle.difficulty,
@@ -49,6 +57,15 @@ def new_game(request):
     difficulty = request.GET.get('difficulty', 'easy').lower()
     size = int(request.GET.get('size', 4))  # Default to 4 if not provided
 
+    # identify old session id
+    existing_id = request.GET.get('session_id', 0) # Pass session_id from the frontend, default to 0 if not
+
+    # Check for an existing session and delete it
+    if existing_id != 0:
+        existing_sessions = Sessions.objects.filter(id=existing_id)
+        if existing_sessions.exists():
+            existing_sessions.delete()
+    
     # Filter games from the database based on difficulty and size
     filtered_games = SudokuGames.objects.filter(difficulty=difficulty, size=size)
 
@@ -56,12 +73,15 @@ def new_game(request):
     if filtered_games.exists():
         # Randomly select a game from the filtered list
         selected_game = random.choice(filtered_games)
+
+        # Create a new session for the selected game
+        session = Sessions.objects.create(sudoku_game=selected_game)
         
         global current_puzzle
         current_puzzle = selected_game  # Update the current puzzle to the newly selected one
         
         return JsonResponse({
-            "id": selected_game.id,
+            "session_id": session.id,
             "puzzle": selected_game.puzzle,
             "solution": selected_game.solution,
             "difficulty": selected_game.difficulty,

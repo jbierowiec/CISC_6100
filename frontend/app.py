@@ -33,7 +33,8 @@ def index():
     return render_template(
         'index.html',
         puzzle=puzzle["puzzle"],
-        solution=puzzle["solution"]  # Pass the solution to the template
+        solution=puzzle["solution"],  # Pass the solution to the template
+        sessionID=puzzle["session_id"]
     )
 
 # Jan
@@ -52,13 +53,21 @@ def new_game():
     # Get the size from the request, default to 4x4 if not provided
     size = int(request.args.get('size', 4))
 
-    # request for a new puzzle based on the selected difficulty/size
-    puzzle_data = requests.get(f"{BACKEND_URL}/new_game/", params={"difficulty": difficulty, "size": size}).json()
+    session_id = request.args.get('session_id', 0)  # Get the session_id if it exists (from the frontend), 
+
+    # Pass the session_id to the backend, where the session will be deleted
+    puzzle_data = requests.get(
+        f"{BACKEND_URL}/new_game/", 
+        params={"difficulty": difficulty, "size": size, "session_id": session_id}
+    ).json()
     
     global current_board, HISTORY
     current_board = puzzle_data["puzzle"]  # Update the current board
     HISTORY = []  # Reset move history for the new game
-    return jsonify({"puzzle": puzzle_data["puzzle"]})
+    return jsonify({
+        "puzzle": puzzle_data["puzzle"],
+        "session_id": puzzle_data["session_id"]  # Return the session_id from the backend response
+    })
 
 # Jan
 @app.route('/get_hint', methods=['POST'])

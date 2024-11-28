@@ -11,7 +11,7 @@
     <title>Sudoku Game</title>
   </head>
 
-  <body onload="updateGrid({{ puzzle|tojson }});">
+  <body>
     <h1>Sudoku Game</h1>
 
     <!-- Top controls: Timer, Difficulty, and Dark/Light Mode -->
@@ -87,6 +87,16 @@
       let seconds = 0;
       let isPaused = false;
 
+      // when the html page is loaded, generate the random puzzle
+      document.addEventListener("DOMContentLoaded", function() {
+          // Store the session ID in localStorage when the page loads
+          sessionID = "{{ sessionID }}";  // Use the sessionID passed from Flask
+          console.log(sessionID);
+          localStorage.setItem("session_id", sessionID);
+        
+          updateGrid({{ puzzle|tojson }}); 
+      });
+  
       // Jan
       // Function to get a hint
       function getHint() {
@@ -515,12 +525,26 @@
 
         const puzzleSize = document.getElementById("puzzleSize").value; // Get the selected puzzle size
 
+        // Get the existing session_id from localStorage if it exists
+        const existingSessionId = localStorage.getItem('session_id'); 
+
+        // Request for a new game (pass the existing session_id if available)
         const response = await fetch(
+          `/new_game?difficulty=${difficulty}&size=${puzzleSize}&session_id=${existingSessionId}`
+        );
+  
+        const { puzzle, session_id } = await response.json();
+
+        // Store the new session_id in localStorage for future use
+        localStorage.setItem('session_id', session_id);
+        
+        /*const response = await fetch(
           `/new_game?difficulty=${difficulty}&size=${puzzleSize}`
         );
 
-        const { puzzle } = await response.json();
+        const { puzzle } = await response.json();*/
         console.log(puzzle);
+        console.log(session_id);
         updateGrid(puzzle);
 
         // Reset the mistake counter
