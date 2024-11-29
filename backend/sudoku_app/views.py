@@ -18,16 +18,16 @@ def index(request):
 @csrf_exempt
 def get_current_puzzle(request):
     global current_puzzle
-    games = SudokuGames.objects.all() # sets to all games in the database
-    current_puzzle = random.choice(games)
+    session_id = request.GET.get('session_id')
+    if not session_id:
+        return JsonResponse({"error": "Session ID is required"}, status=400)
     
-    # Create a new session for the first game
-    session = Sessions.objects.create(sudoku_game=current_puzzle)
+    current_session = Sessions.objects.get(id = session_id) # get the current session
+    current_puzzle = SudokuGames.objects.get(id = current_session.sudoku_game.id) # get the puzzle associated with the session
     
     # Return the current puzzle without changing it
     if current_puzzle:
         return JsonResponse({
-            "session_id": session.id,
             "puzzle_id": current_puzzle.id,
             "puzzle": current_puzzle.puzzle,
             "solution": current_puzzle.solution,
@@ -37,6 +37,28 @@ def get_current_puzzle(request):
     else:
         return JsonResponse({"error": "No puzzle available"})
 
+@csrf_exempt
+def new_session(request):
+    global current_puzzle
+    games = SudokuGames.objects.filter(size = 4, difficulty = "easy") # sets to all games in the database
+    current_puzzle = random.choice(games)
+    
+    # Create a new session for the first game
+    session = Sessions.objects.create(sudoku_game=current_puzzle)
+    
+    # Return the current puzzle without changing it
+    if current_puzzle:
+        return JsonResponse({
+            "session_id": session.id,
+            "puzzle_id": session.sudoku_game.id,
+            "puzzle": session.sudoku_game.puzzle,
+            "solution": session.sudoku_game.solution,
+            "difficulty": session.sudoku_game.difficulty,
+            "size": session.sudoku_game.size
+        })
+    else:
+        return JsonResponse({"error": "No puzzle available"})
+    
 @csrf_exempt
 def check_solution(request):
     if request.method == "POST":

@@ -88,13 +88,28 @@
       let isPaused = false;
 
       // when the html page is loaded, generate the random puzzle
-      document.addEventListener("DOMContentLoaded", function() {
+      document.addEventListener("DOMContentLoaded", async function() {
           // Store the session ID in localStorage when the page loads
-          sessionID = "{{ sessionID }}";  // Use the sessionID passed from Flask
-          console.log(sessionID);
-          localStorage.setItem("session_id", sessionID);
+          currentSessionID = localStorage.getItem("session_id")
+          console.log(currentSessionID)
+          if (!currentSessionID) // if there was not an existing session, set it to 0
+            currentSessionID = 0
+          
+          // Request for a new game (pass the existing session_id if available)
+          response = await fetch(
+          `/get_session?session_id=${currentSessionID}`
+          );
+          data = await response.json();
+
+          const newSessionID = data.new_session_id 
+          console.log(newSessionID);
+
+          localStorage.setItem("session_id", newSessionID); // set the new session id if one was created
         
-          updateGrid({{ puzzle|tojson }}); 
+          puzzleResponse = await fetch(`/get_puzzle?session_id=${newSessionID}`) // get the puzzle from the session
+          const puzzleData = await puzzleResponse.json();
+          
+          updateGrid(puzzleData.puzzle);
       });
   
       // Jan

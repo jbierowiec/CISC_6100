@@ -25,17 +25,28 @@ class Move:
 # Jan
 @app.route('/')
 def index():
-    # Fetch the current puzzle from the backend
-    puzzle = requests.get(f"{BACKEND_URL}/get_puzzle/").json()
-    global current_board, current_solution
-    current_board = puzzle["puzzle"]  # Initialize the current board with the puzzle
-    current_solution = puzzle["solution"]
-    return render_template(
-        'index.html',
-        puzzle=puzzle["puzzle"],
-        solution=puzzle["solution"],  # Pass the solution to the template
-        sessionID=puzzle["session_id"]
-    )
+    return render_template('index.html')
+
+# Mark
+@app.route('/get_puzzle', methods = ['GET'])
+def get_puzzle():
+    session_id = request.args.get('session_id')
+    # gets the puzzle that was associates with the given session
+    puzzle = requests.get(f"{BACKEND_URL}/get_puzzle/", params={ "session_id": session_id}).json()
+    return jsonify({
+        "puzzle": puzzle["puzzle"], # return the puzzle from the backend response
+        "solution": puzzle["solution"]  
+    })
+
+# Mark
+@app.route('/get_session', methods = ['GET'])
+def get_session():    
+    current_session_id = request.args.get('session_id') 
+    if (current_session_id == '0'):
+        new_session= requests.get(f"{BACKEND_URL}/new_session/").json()
+        return jsonify({"new_session_id": new_session["session_id"]})
+    else:
+        return jsonify({"new_session_id": current_session_id})
 
 # Jan
 @app.route('/check_solution', methods=['POST'])
