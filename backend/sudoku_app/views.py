@@ -4,6 +4,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from sudoku_app.models import SudokuGames
 from sudoku_app.models import Sessions
+from sudoku_app.models import Cell
+from sudoku_app.models import History
 from django.shortcuts import render
 
 # Global variable to hold the current puzzle
@@ -12,7 +14,22 @@ current_puzzle = None
 @csrf_exempt # to keep for testing purposes
 def index(request):
     sessionsTracker = Sessions.objects.all()
-    sessions_data = list(sessionsTracker.values())  # Convert queryset to a list of dictionaries
+    sessions_data = []
+
+    for session in sessionsTracker:
+        # Fetch all cells related to the current session
+        cellsTracker = session.cells.all()
+        cells_data = list(cellsTracker.values("row", "column", "value", "solution"))
+
+        # Add session data along with its cells
+        sessions_data.append({
+            "session_id": session.id,
+            "sudoku_game_id": session.sudoku_game.id,
+            "created_at": session.created_at,
+            "last_updated": session.last_updated,
+            "cells": cells_data,
+        })
+
     return JsonResponse(sessions_data, safe=False)
 
 @csrf_exempt
@@ -40,13 +57,24 @@ def get_current_puzzle(request):
 @csrf_exempt
 def new_session(request):
     global current_puzzle
-    games = SudokuGames.objects.filter(size = 4, difficulty = "easy") # sets to all games in the database
+    games = SudokuGames.objects.filter(size = 4, difficulty = "easy") 
     current_puzzle = random.choice(games)
     
     # Create a new session for the first game
-    session = Sessions.objects.create(sudoku_game=current_puzzle)
+    session = Sessions.objects.create(sudoku_game=current_puzzle) # relates a random game to the new session
     
-    # Return the current puzzle without changing it
+    # Initialize cells for the session
+    for row_index, row in enumerate(current_puzzle.puzzle):
+        for col_index, value in enumerate(row):
+            Cell.objects.create(
+                session=session,
+                row=row_index,
+                column=col_index,
+                value=value,
+                solution=current_puzzle.solution[row_index][col_index]
+            )
+
+    # Return the session id and puzzle information
     if current_puzzle:
         return JsonResponse({
             "session_id": session.id,
@@ -102,6 +130,17 @@ def new_game(request):
         global current_puzzle
         current_puzzle = selected_game  # Update the current puzzle to the newly selected one
         
+        # Initialize cells for the session
+        for row_index, row in enumerate(selected_game.puzzle):
+            for col_index, value in enumerate(row):
+                Cell.objects.create(
+                    session=session,
+                    row=row_index,
+                    column=col_index,
+                    value=value,
+                    solution=selected_game.solution[row_index][col_index]
+                )
+
         return JsonResponse({
             "session_id": session.id,
             "puzzle": selected_game.puzzle,

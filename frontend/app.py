@@ -102,6 +102,7 @@ def isCorrect():
     row = request.json.get("row")
     col = request.json.get("col")
     userValue = request.json.get("value")
+    session_id = request.json.get("session_id")
     response = requests.post(f"{BACKEND_URL}/is_correct/", json={"row": row, "col": col, "userValue": userValue})
     response_data = response.json()
     isCorrect = response_data.get("correct")

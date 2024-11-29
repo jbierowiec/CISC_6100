@@ -90,6 +90,7 @@
       // when the html page is loaded, generate the random puzzle
       document.addEventListener("DOMContentLoaded", async function() {
           // Store the session ID in localStorage when the page loads
+          localStorage.removeItem("session_id")
           currentSessionID = localStorage.getItem("session_id")
           console.log(currentSessionID)
           if (!currentSessionID) // if there was not an existing session, set it to 0
