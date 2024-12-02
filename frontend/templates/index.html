@@ -90,7 +90,6 @@
       // when the html page is loaded, generate the random puzzle
       document.addEventListener("DOMContentLoaded", async function() {
           // Store the session ID in localStorage when the page loads
-          localStorage.removeItem("session_id")
           currentSessionID = localStorage.getItem("session_id")
           console.log(currentSessionID)
           if (!currentSessionID) // if there was not an existing session, set it to 0
@@ -110,7 +109,7 @@
           puzzleResponse = await fetch(`/get_puzzle?session_id=${newSessionID}`) // get the puzzle from the session
           const puzzleData = await puzzleResponse.json();
           
-          updateGrid(puzzleData.puzzle);
+          updateGrid(puzzleData.cells);
       });
   
       // Jan
@@ -450,6 +449,7 @@
         });
       });
 
+      
       // Jan
       // Function to select a number from the number buttons and input it into a cell
       async function selectNumber(num) {
@@ -464,17 +464,27 @@
           userRow = selectedCell.dataset.row;
           userCol = selectedCell.dataset.col;
 
-          // Correct field - Jonathan
-          const response = await fetch("/isCorrect", {
+          // Get the existing session_id from localStorage 
+          const existingSessionId = localStorage.getItem('session_id'); 
+
+          
+          const updateResponse = await fetch("/update_cell", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ row: userRow, col: userCol, value: num }),
+            body: JSON.stringify({ row: userRow, column: userCol, new_value: num, session_id: existingSessionId, }),
           });
 
-          const result = await response.json();
+          // Correct field - Jonathan
+          const correctnessResponse = await fetch("/isCorrect", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ row: userRow, col: userCol, value: num, session_id: existingSessionId, }),
+          });
+
+          const result = await correctnessResponse.json();
 
           console.log(result.correct);
-
+        /*
           // Record the move in the history if the previous value was empty or different
           if (!previousValue || previousValue !== num.toString()) {
             moveHistory.push({
@@ -484,7 +494,7 @@
               newValue: num,
               correct: result.correct,
             });
-          }
+          }*/
 
           selectedCell.classList.remove("selected"); // Deselect the cell after filling
           selectedCell = null; // Reset the selected cell
@@ -549,7 +559,7 @@
           `/new_game?difficulty=${difficulty}&size=${puzzleSize}&session_id=${existingSessionId}`
         );
   
-        const { puzzle, session_id } = await response.json();
+        const { cells, session_id } = await response.json();
 
         // Store the new session_id in localStorage for future use
         localStorage.setItem('session_id', session_id);
@@ -559,9 +569,8 @@
         );
 
         const { puzzle } = await response.json();*/
-        console.log(puzzle);
         console.log(session_id);
-        updateGrid(puzzle);
+        updateGrid(cells);
 
         // Reset the mistake counter
         mistakeCount = 0;
@@ -605,8 +614,8 @@
 
       // Jan
       // Function that updates the status of the grid
-      function updateGrid(puzzle) {
-        const size = puzzle.length;
+      function updateGrid(cells) {
+        const size = Math.sqrt(cells.length);
         const grid = document.getElementById("sudoku-grid");
         const subGridSize = Math.sqrt(size);
 
@@ -618,7 +627,7 @@
         grid.innerHTML = ""; // Clear existing grid
 
         // Generate cells dynamically
-        for (let row = 0; row < size; row++) {
+       /* for (let row = 0; row < size; row++) {
           for (let col = 0; col < size; col++) {
             const cell = document.createElement("input");
             cell.type = "text";
@@ -627,19 +636,38 @@
             cell.dataset.col = col;
             cell.value = puzzle[row][col] || "";
             if (puzzle[row][col]) {
-              // Mark pre-filled cells
+              // Mark pre-filled cell
               cell.disabled = true;
               cell.dataset.preFilled = "true";
               cell.style.fontWeight = "bold";
             } else {
               cell.dataset.preFilled = "false";
             }
-            cell.style.textAlign = "center";
-            cell.style.width = cellSize;
-            cell.style.height = cellSize;
-            grid.appendChild(cell);
-          }
+      }*/
+      cells.forEach(cell => {
+        const { row, column, value, pre_filled } = cell;
+    
+        const cellElement = document.createElement("input");
+        cellElement.type = "text";
+        cellElement.classList.add("cell");
+        cellElement.dataset.row = row;
+        cellElement.dataset.col = column;
+        // Show nothing if value is 0
+        cellElement.value = value !== 0 ? value : ""; 
+    
+        if (pre_filled) {
+            // Mark pre-filled cells (disable them and make font bold)
+            cellElement.disabled = true;
+            cellElement.style.fontWeight = "bold";
+        } else {
+            // Show value but allow editing if not pre-filled
+            cellElement.style.fontWeight = "normal"; // Regular font for editable cells
         }
+        cellElement.style.textAlign = "center"; // This line should work after the element is created
+        cellElement.style.width = cellSize;
+        cellElement.style.height = cellSize;
+        grid.appendChild(cellElement); // Append the cell element to the grid
+    });
         moveHistory = []; // Reset move history
 
         // Adjust number buttons based on grid size

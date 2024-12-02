@@ -12,15 +12,15 @@ BACKEND_URL = "http://127.0.0.1:8000/sudoku"
 
 # Jonathan
 # HISTORY will be a list of moves with this data
-class Move:
-    def __init__(self, row, col, value, correct):
-        self.row = row
-        self.col = col
-        self.value = value
-        self.correct = correct
+#class Move:
+#    def __init__(self, row, col, value, correct):
+#        self.row = row
+#        self.col = col
+#        self.value = value
+#        self.correct = correct
 
-    def __repr__(self):
-        return f"Move(row={self.row}, col={self.col}, value={self.value}, correct={self.correct})"
+#    def __repr__(self):
+#        return f"Move(row={self.row}, col={self.col}, value={self.value}, correct={self.correct})"
 
 # Jan
 @app.route('/')
@@ -34,7 +34,7 @@ def get_puzzle():
     # gets the puzzle that was associates with the given session
     puzzle = requests.get(f"{BACKEND_URL}/get_puzzle/", params={ "session_id": session_id}).json()
     return jsonify({
-        "puzzle": puzzle["puzzle"], # return the puzzle from the backend response
+        "cells": puzzle["cells"], # return the puzzle from the backend response
         "solution": puzzle["solution"]  
     })
 
@@ -76,7 +76,7 @@ def new_game():
     current_board = puzzle_data["puzzle"]  # Update the current board
     HISTORY = []  # Reset move history for the new game
     return jsonify({
-        "puzzle": puzzle_data["puzzle"],
+        "cells": puzzle_data["cells"],
         "session_id": puzzle_data["session_id"]  # Return the session_id from the backend response
     })
 
@@ -96,20 +96,59 @@ def get_hint():
    except IndexError:
        return jsonify({"error": "Invalid cell position"}), 400
 
+@app.route('/update_cell', methods=['POST'])
+def update_cell():
+    # Parse the JSON data from the request
+    data = request.json
+    session_id = data.get("session_id")
+    row = data.get("row")
+    column = data.get("column")
+    new_value = data.get("new_value")
+
+    # Validate required fields
+    if not session_id or row is None or column is None or new_value is None:
+        return jsonify({"error": "Missing required fields"}), 400
+
+
+    # Send the update request to the backend API
+    response = requests.post(
+        f"{BACKEND_URL}/update_cell/",
+        json={"session_id": session_id, "row": row, "column": column, "new_value": new_value},
+    )
+        
+    # Return the backend's response to the frontend
+    if response.ok:
+        return jsonify(response.json())
+    else:
+        return jsonify({"error": response.json().get("error", "Failed to update cell")}), response.status_code
+    
 # Jonathan
 @app.route('/isCorrect', methods=['POST'])
 def isCorrect():
+    # Extract data from the incoming request
     row = request.json.get("row")
     col = request.json.get("col")
     userValue = request.json.get("value")
     session_id = request.json.get("session_id")
-    response = requests.post(f"{BACKEND_URL}/is_correct/", json={"row": row, "col": col, "userValue": userValue})
+
+    # Validate required fields
+    if row is None or col is None or userValue is None or not session_id:
+        return jsonify({"error": "Missing required fields"}), 400
+
+    # Make a request to the backend to check correctness
+    response = requests.post(
+        f"{BACKEND_URL}/is_correct/",
+        json={"row": row, "col": col, "userValue": userValue, "session_id": session_id}
+    )
+    # Parse the response from the backend
     response_data = response.json()
     isCorrect = response_data.get("correct")
-    move = Move(int(row), int(col), int(userValue), isCorrect)
-    current_board[move.row][move.col] = move.value
-    HISTORY.append(move)
-    return jsonify(response.json())
+
+    # Ensure `current_board` is updated properly
+    if current_board:
+        current_board[int(row)][int(col)] = int(userValue)  # Update the board with the new value
+
+    return jsonify({"correct": isCorrect})
 
 # Jonathan
 @app.route('/undoUntilCorrect', methods=['POST'])

@@ -25,6 +25,7 @@ class Cell(models.Model):
     column = models.IntegerField()
     value = models.IntegerField(default=0) # value the user has entered for the cell at this position, unspecific values are 0
     solution = models.IntegerField() # solution for the cell at this position
+    pre_filled = models.BooleanField(default = False) # whether a cell is supposed to be given or not
 
     def __str__(self):
         return f"Cell ({self.row}, {self.column}) in Session {self.session.id}"

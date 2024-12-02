@@ -8,4 +8,6 @@ urlpatterns = [
     path('is_correct/', views.is_correct, name="is_correct"),
     path('new_game/', views.new_game, name="new_game"),
     path('new_session/', views.new_session, name="new_session"),
+    path('update_cell/', views.update_cell, name="update_cell"),
+    path('get_history/', views.get_history, name="get_history"),
 ]

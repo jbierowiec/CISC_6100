@@ -19,7 +19,11 @@ def index(request):
     for session in sessionsTracker:
         # Fetch all cells related to the current session
         cellsTracker = session.cells.all()
-        cells_data = list(cellsTracker.values("row", "column", "value", "solution"))
+        cells_data = list(cellsTracker.values("row", "column", "value", "solution", "pre_filled"))
+
+        # Fetch all history records related to the current session
+        historyTracker = History.objects.filter(session=session)
+        history_data = list(historyTracker.values("cell__row", "cell__column", "previous_value", "new_value", "timestamp"))
 
         # Add session data along with its cells
         sessions_data.append({
@@ -28,6 +32,7 @@ def index(request):
             "created_at": session.created_at,
             "last_updated": session.last_updated,
             "cells": cells_data,
+            "history": history_data,
         })
 
     return JsonResponse(sessions_data, safe=False)
@@ -42,11 +47,24 @@ def get_current_puzzle(request):
     current_session = Sessions.objects.get(id = session_id) # get the current session
     current_puzzle = SudokuGames.objects.get(id = current_session.sudoku_game.id) # get the puzzle associated with the session
     
+    cells = current_session.cells.all()  # Retrieve all cells related to this session
+    cells_list = []  # List to store the cell information
+    
+    for cell in cells:
+        cell_data = {
+            "row": cell.row,
+            "column": cell.column,
+            "value": cell.value,
+            "solution": cell.solution,
+            "pre_filled": cell.pre_filled  # True if the cell has a pre-filled value (non-zero)
+        }
+        cells_list.append(cell_data)  # Add the cell's data to the list
+
     # Return the current puzzle without changing it
     if current_puzzle:
         return JsonResponse({
             "puzzle_id": current_puzzle.id,
-            "puzzle": current_puzzle.puzzle,
+            "cells": cells_list,  # Return the list of cells instead of the puzzle grid
             "solution": current_puzzle.solution,
             "difficulty": current_puzzle.difficulty,
             "size": current_puzzle.size
@@ -66,12 +84,17 @@ def new_session(request):
     # Initialize cells for the session
     for row_index, row in enumerate(current_puzzle.puzzle):
         for col_index, value in enumerate(row):
+            # Check if the cell's value is non-zero (pre-filled)
+            pre_filled = value != 0  # True if the cell is pre-filled
+            
+            # Create the cell with the pre_filled flag set accordingly
             Cell.objects.create(
                 session=session,
                 row=row_index,
                 column=col_index,
                 value=value,
-                solution=current_puzzle.solution[row_index][col_index]
+                solution=current_puzzle.solution[row_index][col_index],
+                pre_filled=pre_filled  # Set pre_filled to True if the value is non-zero
             )
 
     # Return the session id and puzzle information
@@ -101,6 +124,7 @@ def check_solution(request):
             return JsonResponse({"status": "incorrect"})
     return JsonResponse({"status": "error"})
 
+# Mark
 @csrf_exempt
 def new_game(request):
     # Extract query parameters with default values
@@ -130,20 +154,36 @@ def new_game(request):
         global current_puzzle
         current_puzzle = selected_game  # Update the current puzzle to the newly selected one
         
+        cells_list = []  # List to store the cell information
+
         # Initialize cells for the session
-        for row_index, row in enumerate(selected_game.puzzle):
+        for row_index, row in enumerate(current_puzzle.puzzle):
             for col_index, value in enumerate(row):
-                Cell.objects.create(
+                # Check if the cell's value is non-zero (pre-filled)
+                pre_filled = value != 0  # True if the cell is pre-filled
+            
+                # Create the cell with the pre_filled flag set accordingly
+                cell = Cell.objects.create(
                     session=session,
                     row=row_index,
                     column=col_index,
                     value=value,
-                    solution=selected_game.solution[row_index][col_index]
+                    solution=current_puzzle.solution[row_index][col_index],
+                    pre_filled=pre_filled  # Set pre_filled to True if the value is non-zero
                 )
+                # Add the cell data directly to the cells_data list
+                cells_list.append({
+                    "row": cell.row,
+                    "column": cell.column,
+                    "value": cell.value,
+                    "solution": cell.solution,
+                    "pre_filled": cell.pre_filled
+                })
 
         return JsonResponse({
             "session_id": session.id,
             "puzzle": selected_game.puzzle,
+            "cells": cells_list,
             "solution": selected_game.solution,
             "difficulty": selected_game.difficulty,
             "size": selected_game.size
@@ -169,3 +209,67 @@ def is_correct(request):
         return JsonResponse({
             "correct": False
         })
+    
+@csrf_exempt
+def get_history(request):
+    session_id = request.GET.get("session_id")
+    if not session_id:
+        return JsonResponse({"error": "Session ID is required"})
+
+    try:
+        session = Sessions.objects.get(id=session_id)
+        history_records = session.history.all().order_by("-timestamp")  # Get history related to the session
+
+        # Serialize history records
+        history_data = [
+            {
+                "cell": {
+                    "row": record.cell.row,
+                    "column": record.cell.column
+                },
+                "previous_value": record.previous_value,
+                "new_value": record.new_value,
+                "timestamp": record.timestamp,
+            }
+            for record in history_records
+        ]
+
+        return JsonResponse({"history": history_data})
+    except Sessions.DoesNotExist:
+        return JsonResponse({"error": "Session not found"}, status=404)
+    
+@csrf_exempt
+def update_cell(request):
+   # if request.method == "POST":
+        data = json.loads(request.body)
+        session_id = data.get("session_id")
+        row = data.get("row")
+        column = data.get("column")
+        new_value = data.get("new_value")
+
+        if not session_id or row is None or column is None or new_value is None:
+            return JsonResponse({"error": "Missing required fields"}, status=400)
+
+        try:
+            # Retrieve the session and cell
+            session = Sessions.objects.get(id=session_id)
+            cell = Cell.objects.get(session=session, row=row, column=column)
+
+            # Record the history
+            History.objects.create(
+                session=session,
+                cell=cell,
+                previous_value=cell.value,
+                new_value=new_value,
+            )
+
+            # Update the cell's value
+            cell.value = new_value
+            cell.save()
+
+            return JsonResponse({"success": True, "message": "Cell updated successfully"})
+        except Sessions.DoesNotExist:
+            return JsonResponse({"error": "Session not found"}, status=404)
+        except Cell.DoesNotExist:
+            return JsonResponse({"error": "Cell not found"}, status=404)
+    #return JsonResponse({"error": "Invalid request method"}, status=405)
