@@ -11,6 +11,7 @@ from django.shortcuts import render
 # Global variable to hold the current puzzle
 current_puzzle = None
 
+# Mark
 @csrf_exempt # to keep for testing purposes
 def index(request):
     sessionsTracker = Sessions.objects.all()
@@ -37,6 +38,7 @@ def index(request):
 
     return JsonResponse(sessions_data, safe=False)
 
+# Mark
 @csrf_exempt
 def get_current_puzzle(request):
     global current_puzzle
@@ -72,6 +74,7 @@ def get_current_puzzle(request):
     else:
         return JsonResponse({"error": "No puzzle available"})
 
+# Mark
 @csrf_exempt
 def new_session(request):
     global current_puzzle
@@ -222,7 +225,8 @@ def is_correct(request):
     
     # Return the result
     return JsonResponse({"correct": correct})
-    
+
+# Mark   
 @csrf_exempt
 def get_history(request):
     session_id = request.GET.get("session_id")
@@ -250,7 +254,8 @@ def get_history(request):
         return JsonResponse({"history": history_data})
     except Sessions.DoesNotExist:
         return JsonResponse({"error": "Session not found"}, status=404)
-    
+
+# Mark
 @csrf_exempt
 def update_cell(request):
    # if request.method == "POST":

@@ -2,6 +2,7 @@ from django.db import models
 
 # Create your models here.
 
+# Mark
 class SudokuGames(models.Model):
     puzzle = models.JSONField()
     solution = models.JSONField()
@@ -10,7 +11,8 @@ class SudokuGames(models.Model):
 
     def __str__(self):
         return f"{self.difficulty} {self.size}x{self.size} Sudoku"
-    
+
+# Mark   
 class Sessions(models.Model): 
     sudoku_game = models.ForeignKey(SudokuGames, on_delete=models.CASCADE, related_name="sessions")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -19,6 +21,7 @@ class Sessions(models.Model):
     def __str__(self):
         return f"Session {self.session_id} for {self.sudoku_game}"
 
+# Mark
 class Cell(models.Model):
     session = models.ForeignKey(Sessions, on_delete=models.CASCADE, related_name="cells")
     row = models.IntegerField()
@@ -30,6 +33,7 @@ class Cell(models.Model):
     def __str__(self):
         return f"Cell ({self.row}, {self.column}) in Session {self.session.id}"
 
+# Mark
 class History(models.Model):
     session = models.ForeignKey(Sessions, on_delete=models.CASCADE, related_name="history")
     cell = models.ForeignKey(Cell, on_delete=models.CASCADE, related_name="history")
@@ -43,7 +47,8 @@ class History(models.Model):
             f"Move in Session {self.session.id}: Cell ({self.cell.row}, {self.cell.column}) "
             f"changed from {self.previous_value} to {self.new_value} at {self.timestamp}"
         )
-    
+
+# Mark
 class Note(models.Model):
     cell = models.ForeignKey(Cell, on_delete=models.CASCADE, related_name = "note")
     value = models.JSONField()
