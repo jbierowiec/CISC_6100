@@ -533,11 +533,26 @@
         }
       }
 
-      // Jan 
+      //Jonathan: helper function to check if arrays are equal
+      function boardsEqual(array1, array2) {
+        if (array1.length !== array2.length) return false;
+
+        for (let i = 0; i < array1.length; i++) {
+          if (array1[i].length !== array2[i].length){
+             return false;
+          }
+          for (let j = 0; j < array1[i].length; j++) {
+            if (array1[i][j] !== array2[i][j]) return false;
+          }
+        }
+        return true;
+      }
+
+      // Jan / Jonathan
       // Function to check solution of the board
       async function checkSolution() {
         const puzzleSize = parseInt(document.getElementById("puzzleSize").value);
-        const solution = [];
+        const userSolution = [];
 
         for (let i = 0; i < puzzleSize; i++) {
           const row = [];
@@ -552,18 +567,34 @@
               row.push(0);
             }
           }
-          solution.push(row);
+          userSolution.push(row);
+        }
+        
+        //fetch the sessionId from the local storage
+        const sessionId = localStorage.getItem("session_id");
+        if (!sessionId) {
+          alert("Session ID is not available. Please restart the game.");
+          return;
         }
 
-        const response = await fetch("/check_solution", {
+        //fetch the puzzle data using the session id
+        puzzleResponse = await fetch(`/get_puzzle?session_id=${sessionId}`)
+        if (!puzzleResponse.ok) {
+          throw new Error("Failed to fetch puzzle from the server");
+        }
+        
+        const puzzleData = await puzzleResponse.json();
+        const solution = puzzleData.solution;
+        const status = boardsEqual(userSolution, solution)
+        /* const response = await fetch("/check_solution", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ solution: solution }),
-        });
+        }); */
 
-        const result = await response.json();
+        /* const result = await response.json(); */
 
-        if (result.status === "correct") {
+        if (status) {
           alert("Sudoku has been solved!");
           stopTimer(); // Stop the timer when the solution is correct
           gameSolved = true; // Set the flag to indicate the game is solved

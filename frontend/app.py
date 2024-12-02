@@ -48,12 +48,12 @@ def get_session():
     else:
         return jsonify({"new_session_id": current_session_id})
 
-# Jan
+""" # Jan
 @app.route('/check_solution', methods=['POST'])
 def check_solution():
     solution = request.json.get("solution")
     response = requests.post(f"{BACKEND_URL}/check_solution/", json={"solution": solution})
-    return jsonify(response.json())
+    return jsonify(response.json()) """
 
 # Jan
 @app.route('/new_game', methods=['GET'])
