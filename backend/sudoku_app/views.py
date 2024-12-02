@@ -23,7 +23,7 @@ def index(request):
 
         # Fetch all history records related to the current session
         historyTracker = History.objects.filter(session=session)
-        history_data = list(historyTracker.values("cell__row", "cell__column", "previous_value", "new_value", "timestamp"))
+        history_data = list(historyTracker.values("cell__row", "cell__column", "previous_value", "new_value", "timestamp", "correct_move"))
 
         # Add session data along with its cells
         sessions_data.append({
@@ -200,15 +200,28 @@ def is_correct(request):
     data = json.loads(request.body)  # Define 'data'
     user_row = int(data.get("row"))  # Convert to integer
     user_col = int(data.get("col"))  # Convert to integer
-    user_value = json.loads(request.body).get("userValue")
-    if(current_puzzle.solution[user_row][user_col] == user_value):
-        return JsonResponse({
-            "correct": True
-        })
-    else:
-        return JsonResponse({
-            "correct": False
-        })
+    session_id = int(data.get("session_id"))
+    user_value = int(data.get("userValue"))
+    
+    session = Sessions.objects.get(id = session_id) # get the current session
+    
+    # Fetch the cell from the database
+    cell = Cell.objects.filter(session=session, row=user_row, column=user_col).first()
+    if not cell:
+        return JsonResponse({"error": "Cell not found"}, status=404)
+    
+    # Check if the user value is correct
+    correct = current_puzzle.solution[user_row][user_col] == user_value
+
+    # Get the corresponding history record
+    history_entry = History.objects.filter(session=session, cell=cell).first()
+    if history_entry:
+        # Update the `correct_move` field
+        history_entry.correct_move = correct
+        history_entry.save()  # Save the updated history entry
+    
+    # Return the result
+    return JsonResponse({"correct": correct})
     
 @csrf_exempt
 def get_history(request):

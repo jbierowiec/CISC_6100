@@ -36,6 +36,7 @@ class History(models.Model):
     previous_value = models.IntegerField()  # The cell's value before the move
     new_value = models.IntegerField()       # The cell's value after the move
     timestamp = models.DateTimeField(auto_now_add=True)  # When the move was made
+    correct_move = models.BooleanField(default = False) # if this move led to a correct solution or not
 
     def __str__(self):
         return (
