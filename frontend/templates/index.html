@@ -51,6 +51,7 @@
       <button onclick="undoMove()">Undo</button>
       <button onclick="undoUntilCorrect()">Undo Until Correct</button>
       <button onclick="getHint()">Get Specific Hint</button>
+      <button onclick="getRandomHint()">Get Random Hint</button>
       <!-- 
       <button id="set-note-button" onclick="toggleSetNote()">
         Set Note: Off
@@ -125,6 +126,32 @@
           alert("Please select a cell first.");
         }
       }
+
+      // Jonathan
+      // Random Hint. Similar logic to the getHint, as now we just generate a random cell, make sure it is empty, then pass it to getSpecificHint
+      function getRandomHint() {
+        const size = parseInt(document.getElementById("puzzleSize").value); // Get the board size (4x4, 9x9, 16x16)
+
+        // Ensure the grid is loaded and has cells
+        const cells = document.querySelectorAll(".cell");
+        if (cells.length === 0) {
+          alert("The board is not ready yet.");
+          return;
+        }
+
+        let row, col, cell;
+
+        // Keep generating random rows and columns until an empty cell is found
+        do {
+          row = Math.floor(Math.random() * size); // Random row index
+          col = Math.floor(Math.random() * size); // Random column index
+          cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+        } while (cell && (cell.value !== "" || cell.disabled)); // Ensure the cell is empty and not pre-filled
+
+        // Pass the random row and column into getSpecificHint
+        getSpecificHint(row, col);
+      }
+
 
       // Jan
       // Function to get a specifc hint
