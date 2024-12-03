@@ -144,7 +144,7 @@ def isCorrect():
     response_data = response.json()
     isCorrect = response_data.get("correct")
 
-    # Ensure `current_board` is updated properly
+    # Ensure current_board is updated properly
     if current_board:
         current_board[int(row)][int(col)] = int(userValue)  # Update the board with the new value
 
@@ -176,6 +176,28 @@ def undoUntilCorrect():
         "index": first_wrong
     })
 
+#Jonathan
+@app.route('/setNote', methods=['POST'])
+def setNote():
+    data = request.json
+    session_id = data.get("session_id")
+    row = data.get("row")
+    column = data.get("column")
+    note_value = data.get("note_value")
+
+    if not session_id or row is None or column is None or note_value is None:
+        return jsonify({"error": "Missing required fields"}), 400
+    
+    # Send request to the backend API to update the notes
+    response = requests.post(
+        f"{BACKEND_URL}/set_note/",
+        json={"session_id": session_id, "row": row, "column": column, "note_value": note_value},
+    )
+
+    if response.ok:
+        return jsonify(response.json())
+    else:
+        return jsonify({"error": response.json().get("error", "Failed to update notes")}), response.status_code
         
 if __name__ == '__main__':
     app.run(debug=True)

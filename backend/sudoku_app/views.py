@@ -113,7 +113,7 @@ def new_session(request):
     else:
         return JsonResponse({"error": "No puzzle available"})
     
-@csrf_exempt
+""" @csrf_exempt
 def check_solution(request):
     if request.method == "POST":
         user_solution = json.loads(request.body).get("solution")
@@ -125,7 +125,7 @@ def check_solution(request):
             return JsonResponse({"status": "correct"})
         else:
             return JsonResponse({"status": "incorrect"})
-    return JsonResponse({"status": "error"})
+    return JsonResponse({"status": "error"}) """
 
 # Mark
 @csrf_exempt
@@ -272,6 +272,7 @@ def update_cell(request):
             # Retrieve the session and cell
             session = Sessions.objects.get(id=session_id)
             cell = Cell.objects.get(session=session, row=row, column=column)
+            correct = (new_value == cell.solution)
 
             # Record the history
             History.objects.create(
@@ -279,6 +280,7 @@ def update_cell(request):
                 cell=cell,
                 previous_value=cell.value,
                 new_value=new_value,
+                correct_move = correct
             )
 
             # Update the cell's value
@@ -291,3 +293,21 @@ def update_cell(request):
         except Cell.DoesNotExist:
             return JsonResponse({"error": "Cell not found"}, status=404)
     #return JsonResponse({"error": "Invalid request method"}, status=405)
+
+#Jonathan
+@csrf_exempt
+def set_note(request):
+    try:
+        data = json.loads(request.body)
+        session_id = data.get("session_id")
+        note = data.get("note_value")
+        row = data.get("row")
+        column = data.get("column")
+        session = Sessions.objects.get(id=session_id)
+        cell = Cell.objects.get(session=session, row=row, column=column)
+        cell.notes.append(int(note))
+        return JsonResponse({"success": True, "message": "Notes updated successfully"})
+    except Sessions.DoesNotExist:
+        return JsonResponse({"error": "Session not found"}, status=404)
+    except Cell.DoesNotExist:
+        return JsonResponse({"error": "Cell not found"}, status=404)
