@@ -220,7 +220,7 @@
       // Function to undo until the last correct state of the game
       async function undoUntilCorrect() {
         const response = await fetch(`/undoUntilCorrect`, {
-          method: "POST", // Use POST method
+          method: "POST", 
           headers: {
             "Content-Type": "application/json", // Include the Content-Type header
           },
@@ -230,7 +230,13 @@
         const data = await response.json();
         const first_wrong = data.index;
         const puzzle = data.puzzle;
-        console.log(puzzle);
+        puzzleResponse = await fetch(`/get_puzzle?session_id=${sessionId}`)
+        if (!puzzleResponse.ok) {
+          throw new Error("Failed to fetch puzzle from the server");
+        }
+        
+        const puzzleData = await puzzleResponse.json();
+        puzzle = puzzleData.cells
         updateGrid(puzzle);
 
         for (

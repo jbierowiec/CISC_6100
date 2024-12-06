@@ -200,7 +200,7 @@ def new_game(request):
 #Jonathan
 @csrf_exempt
 def is_correct(request):
-    data = json.loads(request.body)  # Define 'data'
+    data = json.loads(request.body)  
     user_row = int(data.get("row"))  # Convert to integer
     user_col = int(data.get("col"))  # Convert to integer
     session_id = int(data.get("session_id"))
@@ -247,6 +247,7 @@ def get_history(request):
                 "previous_value": record.previous_value,
                 "new_value": record.new_value,
                 "timestamp": record.timestamp,
+                "correct_move": record.correct_move
             }
             for record in history_records
         ]
@@ -255,6 +256,45 @@ def get_history(request):
     except Sessions.DoesNotExist:
         return JsonResponse({"error": "Session not found"}, status=404)
 
+#Jonathan
+@csrf_exempt
+def update_history(request):
+    session_id = request.GET.get("session_id")
+    session = Sessions.objects.get(id=session_id)
+    if not session_id:
+        return JsonResponse({"error": "Session ID is required"}, status=400)
+    try: 
+        data = json.loads(request.body)
+        incoming_history = data.get("history")
+
+        if not incoming_history:
+            return JsonResponse({"error": "Missing 'history' field in the request"}, status=400)
+
+        # Clear existing history for the session
+        session.history.all().delete()
+
+        # Create new History entries using bulk_create
+        history_instances = [
+            History(
+                session=session,
+                cell=Cell.objects.get(
+                    session=session,
+                    row=record["cell"]["row"],
+                    column=record["cell"]["column"],
+                ),
+                previous_value=record.get("previous_value", 0),
+                new_value=record["new_value"],
+            )
+            for record in incoming_history
+        ]
+
+        # Bulk create the new history entries
+        History.objects.bulk_create(history_instances)
+
+        return JsonResponse({"success": True, "message": "History updated successfully"})
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    
 # Mark
 @csrf_exempt
 def update_cell(request):
@@ -294,6 +334,29 @@ def update_cell(request):
             return JsonResponse({"error": "Cell not found"}, status=404)
     #return JsonResponse({"error": "Invalid request method"}, status=405)
 
+#Jonathan
+@csrf_exempt
+def reset_cell(request):
+    data = json.loads(request.body)
+    session_id = data.get("session_id")
+    row = data.get("row")
+    column = data.get("column")
+    new_value = 0
+    try:
+        # Retrieve the session and cell
+        session = Sessions.objects.get(id=session_id)
+        cell = Cell.objects.get(session=session, row=row, column=column)
+
+        # Update the cell's value
+        cell.value = new_value
+        cell.save()
+
+        return JsonResponse({"success": True, "message": "Cell updated successfully"})
+    except Sessions.DoesNotExist:
+        return JsonResponse({"error": "Session not found"}, status=404)
+    except Cell.DoesNotExist:
+        return JsonResponse({"error": "Cell not found"}, status=404)
+    
 #Jonathan
 @csrf_exempt
 def set_note(request):
