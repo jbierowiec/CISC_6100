@@ -374,3 +374,20 @@ def set_note(request):
         return JsonResponse({"error": "Session not found"}, status=404)
     except Cell.DoesNotExist:
         return JsonResponse({"error": "Cell not found"}, status=404)
+
+@csrf_exempt
+def get_notes(request):
+    try:
+        data = json.loads(request.body)
+        session_id = data.get("session_id")
+        note = data.get("note_value")
+        row = data.get("row")
+        column = data.get("column")
+        session = Sessions.objects.get(id=session_id)
+        cell = Cell.objects.get(session=session, row=row, column=column)
+        notes = cell.notes
+        return JsonResponse({"notes": notes})
+    except Sessions.DoesNotExist:
+        return JsonResponse({"error": "Session not found"}, status=404)
+    except Cell.DoesNotExist:
+        return JsonResponse({"error": "Cell not found"}, status=404)
