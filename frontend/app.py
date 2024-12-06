@@ -81,11 +81,12 @@ def new_game():
     })
 
 # Jan
-@app.route('/get_hint', methods=['POST'])
+""" @app.route('/get_hint', methods=['POST'])
 def get_hint():
    data = request.json
+   session_id = data.get("session_id")
    row = data.get("row")
-   col = data.get("col")
+   column = data.get("column")
 
    if row is None or col is None:
        return jsonify({"error": "Invalid row or column"}), 400
@@ -94,7 +95,7 @@ def get_hint():
        hint_value = current_solution[row][col]
        return jsonify({"hint": hint_value})
    except IndexError:
-       return jsonify({"error": "Invalid cell position"}), 400
+       return jsonify({"error": "Invalid cell position"}), 400 """
 
 @app.route('/update_cell', methods=['POST'])
 def update_cell():

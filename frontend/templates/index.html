@@ -154,32 +154,33 @@
       }
 
 
-      // Jan
+      // Jan / Jonathan
       // Function to get a specifc hint
       async function getSpecificHint(row, col) {
         try {
           // Call the backend to get the solution for the specific cell
-          const response = await fetch(`/get_hint`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ row: row, col: col }),
-          });
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch hint from the server");
+          //fetch the sessionId from the local storage
+          const sessionId = localStorage.getItem("session_id");
+          if (!sessionId) {
+            alert("Session ID is not available. Please restart the game.");
+            return;
           }
-
-          const result = await response.json();
-
-          if (result.hint !== undefined) {
+          puzzleResponse = await fetch(`/get_puzzle?session_id=${sessionId}`)
+          if (!puzzleResponse.ok) {
+            throw new Error("Failed to fetch puzzle from the server");
+          }
+          const puzzleData = await puzzleResponse.json();
+          const solution = puzzleData.solution;
+          hint = solution[row][col]
+          if (hint !== undefined) {
             // Fill the cell with the hint value
             const cell = document.querySelector(
               `.cell[data-row="${row}"][data-col="${col}"]`
             );
             if (cell && !cell.disabled) {
-              cell.value = result.hint;
+              cell.value = hint;
               alert(
-                `Hint for cell (${row + 1}, ${col + 1}) is: ${result.hint}`
+                `Hint for cell (${row + 1}, ${col + 1}) is: ${hint}`
               );
             } else {
               alert("This cell is already filled or disabled.");
