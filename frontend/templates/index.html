@@ -52,6 +52,7 @@
       <button onclick="undoUntilCorrect()">Undo Until Correct</button>
       <button onclick="getHint()">Get Specific Hint</button>
       <button onclick="getRandomHint()">Get Random Hint</button>
+      <button onclick="note()">Set Note</button>
       <!-- 
       <button id="set-note-button" onclick="toggleSetNote()">
         Set Note: Off
@@ -113,6 +114,83 @@
           
           updateGrid(puzzleData.cells);
       });
+
+      //Jonathan
+      function note(){
+        console.log(selectedCell)
+        if (selectedCell) {
+          const row = parseInt(selectedCell.dataset.row);
+          const col = parseInt(selectedCell.dataset.col);
+          const puzzleSize = parseInt(document.getElementById("puzzleSize").value);
+          const value = prompt("Enter a note value (1-9):");
+          if(value && !isNaN(value) && value >= 1 && value <= puzzleSize){
+            setNote(row, col, parseInt(value))
+          } else{
+            alert("Invalid note value. Please enter a valid number");
+          }
+        } else {
+          alert("Please select a cell first.");
+        }
+      }
+
+      //Jonathan
+      async function setNote(row, col, noteValue) {
+        const session_id = localStorage.getItem("session_id");
+        try {
+          const response = await fetch("/set_note/", {
+              method: "POST",
+              headers: {
+                  "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                  session_id: session_id,
+                  row: row,
+                  column: col,
+                  note_value: noteValue,
+              }),
+          });
+
+          if (!response.ok) {
+              throw new Error("Failed to update note in backend");
+          }
+
+          const data = await response.json();
+          if (data.success) {
+              // Call the function to update the UI with the new notes
+              updateNotes(row, col, data.notes);
+          } else {
+              console.error("Backend update failed:", data.error);
+          }
+        } catch (error) {
+            console.error("Error updating note in backend:", error);
+        }
+      }
+
+      //Jonathan
+      function updateNotes(row, col, notes) {
+        const cellContainer = document.querySelector(
+            `.cell-container[data-row="${row}"][data-col="${col}"]`
+        );
+        if (!cellContainer) return;
+
+        const noteGrid = cellContainer.querySelector(".notes-grid");
+        if (!noteGrid) return;
+
+        // Clear the existing notes
+        noteGrid.innerHTML = "";
+
+        // Add the updated notes
+        for (let note = 1; note <= 9; note++) {
+            const noteElement = document.createElement("div");
+            noteElement.classList.add("note");
+            noteElement.style.fontSize = "8px";
+            noteElement.style.textAlign = "center";
+            noteElement.style.lineHeight = `${noteGrid.clientHeight / 3}px`;
+            noteElement.textContent = notes.includes(note) ? note : ""; // Show the note if it exists
+            noteGrid.appendChild(noteElement);
+        }
+      }
+
   
       // Jan
       // Function to get a hint
@@ -683,77 +761,91 @@
       function updateGrid(cells) {
         const size = Math.sqrt(cells.length);
         const grid = document.getElementById("sudoku-grid");
-        const subGridSize = Math.sqrt(size);
+        const cellSize = size === 16 ? "30px" : size === 9 ? "40px" : "50px";
 
-        const cellSize = size === 16 ? "30px" : size === 9 ? "40px" : "50px"; // Adjust cell size based on grid size
-
-        // Sets up CSS grid with the appropriate size
         grid.style.gridTemplateRows = `repeat(${size}, ${cellSize})`;
         grid.style.gridTemplateColumns = `repeat(${size}, ${cellSize})`;
         grid.innerHTML = ""; // Clear existing grid
 
-        // Generate cells dynamically
-       /* for (let row = 0; row < size; row++) {
-          for (let col = 0; col < size; col++) {
-            const cell = document.createElement("input");
-            cell.type = "text";
-            cell.classList.add("cell");
-            cell.dataset.row = row;
-            cell.dataset.col = col;
-            cell.value = puzzle[row][col] || "";
-            if (puzzle[row][col]) {
-              // Mark pre-filled cell
-              cell.disabled = true;
-              cell.dataset.preFilled = "true";
-              cell.style.fontWeight = "bold";
-            } else {
-              cell.dataset.preFilled = "false";
-            }
-      }*/
-      cells.forEach(cell => {
-        const { row, column, value, pre_filled } = cell;
-    
-        const cellElement = document.createElement("input");
-        cellElement.type = "text";
-        cellElement.classList.add("cell");
-        cellElement.dataset.row = row;
-        cellElement.dataset.col = column;
-        // Show nothing if value is 0
-        cellElement.value = value !== 0 ? value : ""; 
-    
-        if (pre_filled) {
-            // Mark pre-filled cells (disable them and make font bold)
-            cellElement.disabled = true;
-            cellElement.style.fontWeight = "bold";
-        } else {
-            // Show value but allow editing if not pre-filled
-            cellElement.style.fontWeight = "normal"; // Regular font for editable cells
-        }
-        cellElement.style.textAlign = "center"; // This line should work after the element is created
-        cellElement.style.width = cellSize;
-        cellElement.style.height = cellSize;
-        grid.appendChild(cellElement); // Append the cell element to the grid
-    });
-        moveHistory = []; // Reset move history
+        cells.forEach((cell) => {
+            const { row, column, value, pre_filled, notes = [] } = cell;
 
-        // Adjust number buttons based on grid size
-        updateNumberButtons(size);
-        // Function to handle cell selection (remains largely the same)
-        document.querySelectorAll(".cell").forEach((cell) => {
-          cell.addEventListener("click", () => {
-            // Deselect previously selected cell, if any
-            document
-              .querySelectorAll(".cell")
-              .forEach((c) => c.classList.remove("selected"));
-            // Mark the clicked cell as selected
-            cell.classList.add("selected");
-            selectedCell = cell;
-          });
+            // Create the main cell container
+            const cellContainer = document.createElement("div");
+            cellContainer.classList.add("cell-container");
+            cellContainer.style.position = "relative";
+            cellContainer.style.width = cellSize;
+            cellContainer.style.height = cellSize;
+            cellContainer.dataset.row = row;
+            cellContainer.dataset.col = column;
+
+            // Add a click event listener to select the cell
+            cellContainer.addEventListener("click", () => {
+                // Deselect previously selected cell
+                document.querySelectorAll(".cell-container").forEach((container) => {
+                    container.classList.remove("selected");
+                });
+
+                // Mark the clicked cell as selected
+                cellContainer.classList.add("selected");
+                selectedCell = cellContainer; // Update the global selectedCell variable
+            });
+
+            // Create the input field for the cell
+            const inputField = document.createElement("input");
+            inputField.type = "text";
+            inputField.classList.add("cell");
+            inputField.style.textAlign = "center";
+            inputField.value = value !== 0 ? value : "";
+            inputField.disabled = pre_filled;
+            inputField.style.fontWeight = pre_filled ? "bold" : "normal";
+            inputField.dataset.row = row;
+            inputField.dataset.col = column;
+
+            // Add event listener to toggle notes visibility
+            inputField.addEventListener("input", () => {
+                noteGrid.style.display = inputField.value ? "none" : "grid";
+            });
+
+            // Create the notes grid (9x9 mini grid)
+            const noteGrid = document.createElement("div");
+            noteGrid.classList.add("notes-grid");
+            noteGrid.style.display = value === 0 ? "grid" : "none";
+            noteGrid.style.gridTemplateRows = "repeat(3, 1fr)";
+            noteGrid.style.gridTemplateColumns = "repeat(3, 1fr)";
+            noteGrid.style.position = "absolute";
+            noteGrid.style.top = "0";
+            noteGrid.style.left = "0";
+            noteGrid.style.width = "100%";
+            noteGrid.style.height = "100%";
+
+            // Populate notes grid with values
+            for (let note = 1; note <= 9; note++) {
+                const noteElement = document.createElement("div");
+                noteElement.classList.add("note");
+                noteElement.style.fontSize = "8px";
+                noteElement.style.textAlign = "center";
+                noteElement.style.lineHeight = `${parseInt(cellSize) / 3}px`;
+                noteElement.textContent = notes.includes(note) ? note : ""; // Show note if it exists
+                noteGrid.appendChild(noteElement);
+            }
+
+            // Append input field and notes grid to the cell container
+            cellContainer.appendChild(inputField);
+            cellContainer.appendChild(noteGrid);
+
+            // Append the cell container to the grid
+            grid.appendChild(cellContainer);
         });
 
-        enforceMaxLength();
+        // Reset move history and other settings
+        moveHistory = [];
+        updateNumberButtons(size);
         updateBorders();
-      }
+    }
+
+
+
 
       // Jan
       // Function to generate number buttons based on the grid size

@@ -280,7 +280,7 @@ body.dark-mode .number-controls button:hover {
   width: 100%;
   height: 100%;
   display: grid;
-  pointer-events: none; /* Prevent accidental clicks when Set Note is off */
+  pointer-events: auto; /* Prevent accidental clicks when Set Note is off */
 }
 
 .note {

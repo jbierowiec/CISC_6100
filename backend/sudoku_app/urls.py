@@ -10,6 +10,7 @@ urlpatterns = [
     path('update_cell/', views.update_cell, name="update_cell"),
     path('reset_cell/', views.reset_cell, name="reset_cell"),
     path('set_note/', views.set_note, name="set_note"),
+    path('get_notes/', views.get_notes, name="get_notes"),
     path('get_history/', views.get_history, name="get_history"),
     path('update_history/', views.update_history, name="update_history"),
 ]

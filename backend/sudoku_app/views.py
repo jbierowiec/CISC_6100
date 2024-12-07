@@ -375,6 +375,7 @@ def set_note(request):
     except Cell.DoesNotExist:
         return JsonResponse({"error": "Cell not found"}, status=404)
 
+#Jonathan
 @csrf_exempt
 def get_notes(request):
     try:
