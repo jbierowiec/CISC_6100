@@ -116,6 +116,7 @@
       });
 
       //Jonathan
+      //this is what is directly called fromm the button. Thuis takes all the values we need then passes it to the async function to set the backend notes
       function note(){
         console.log(selectedCell)
         if (selectedCell) {
@@ -134,6 +135,7 @@
       }
 
       //Jonathan
+      //sets the notes in the backend then calls a function to represent this change in the front end
       async function setNote(row, col, noteValue) {
         const session_id = localStorage.getItem("session_id");
         try {
@@ -167,6 +169,8 @@
       }
 
       //Jonathan
+      // note to mark and jan: this is probably where I need help. when this is called the note should already be set in the backend but I'm not great at front end stuff
+      //this function should just upgrade the grid to display the notes passes in in the row and col passed ins
       function updateNotes(row, col, notes) {
         const cellContainer = document.querySelector(
             `.cell-container[data-row="${row}"][data-col="${col}"]`
@@ -759,18 +763,19 @@
       // Jan
       // Function that updates the status of the grid
       function updateGrid(cells) {
-        const size = Math.sqrt(cells.length);
+        const size = Math.sqrt(cells.length); // Determines grid size (e.g., 4x4, 9x9, 16x16)
         const grid = document.getElementById("sudoku-grid");
         const cellSize = size === 16 ? "30px" : size === 9 ? "40px" : "50px";
 
         grid.style.gridTemplateRows = `repeat(${size}, ${cellSize})`;
         grid.style.gridTemplateColumns = `repeat(${size}, ${cellSize})`;
-        grid.innerHTML = ""; // Clear existing grid
+        grid.innerHTML = ""; // Clear the grid before updating
 
+        // Generate cells dynamically
         cells.forEach((cell) => {
             const { row, column, value, pre_filled, notes = [] } = cell;
 
-            // Create the main cell container
+            // Create a container for the cell and notes
             const cellContainer = document.createElement("div");
             cellContainer.classList.add("cell-container");
             cellContainer.style.position = "relative";
@@ -779,7 +784,7 @@
             cellContainer.dataset.row = row;
             cellContainer.dataset.col = column;
 
-            // Add a click event listener to select the cell
+            // Add click event listener for cell selection
             cellContainer.addEventListener("click", () => {
                 // Deselect previously selected cell
                 document.querySelectorAll(".cell-container").forEach((container) => {
@@ -788,29 +793,37 @@
 
                 // Mark the clicked cell as selected
                 cellContainer.classList.add("selected");
-                selectedCell = cellContainer; // Update the global selectedCell variable
+                selectedCell = cellContainer; // Update the global `selectedCell` variable
+                console.log(`Cell selected: Row ${row}, Column ${column}`);
             });
 
             // Create the input field for the cell
-            const inputField = document.createElement("input");
-            inputField.type = "text";
-            inputField.classList.add("cell");
-            inputField.style.textAlign = "center";
-            inputField.value = value !== 0 ? value : "";
-            inputField.disabled = pre_filled;
-            inputField.style.fontWeight = pre_filled ? "bold" : "normal";
-            inputField.dataset.row = row;
-            inputField.dataset.col = column;
+            const cellElement = document.createElement("input");
+            cellElement.type = "text";
+            cellElement.classList.add("cell");
+            cellElement.dataset.row = row;
+            cellElement.dataset.col = column;
+            cellElement.value = value !== 0 ? value : ""; // Show empty for value 0
+            cellElement.disabled = pre_filled; // Disable pre-filled cells
+            cellElement.style.fontWeight = pre_filled ? "bold" : "normal";
+            cellElement.style.textAlign = "center";
+            cellElement.style.width = "100%";
+            cellElement.style.height = "100%";
 
-            // Add event listener to toggle notes visibility
-            inputField.addEventListener("input", () => {
-                noteGrid.style.display = inputField.value ? "none" : "grid";
+            // Allow typing directly into the cell
+            cellElement.addEventListener("input", (event) => {
+                console.log(`Cell (${row}, ${column}) updated with value: ${event.target.value}`);
+            });
+
+            // Prevent clicking the input from deselecting the cell
+            cellElement.addEventListener("click", (event) => {
+                event.stopPropagation();
             });
 
             // Create the notes grid (9x9 mini grid)
             const noteGrid = document.createElement("div");
             noteGrid.classList.add("notes-grid");
-            noteGrid.style.display = value === 0 ? "grid" : "none";
+            noteGrid.style.display = value === 0 ? "grid" : "none"; // Show notes only if cell is empty
             noteGrid.style.gridTemplateRows = "repeat(3, 1fr)";
             noteGrid.style.gridTemplateColumns = "repeat(3, 1fr)";
             noteGrid.style.position = "absolute";
@@ -818,23 +831,24 @@
             noteGrid.style.left = "0";
             noteGrid.style.width = "100%";
             noteGrid.style.height = "100%";
+            noteGrid.style.pointerEvents = "none"; // Ensure notes don't block input
 
-            // Populate notes grid with values
+            // Populate the notes grid
             for (let note = 1; note <= 9; note++) {
                 const noteElement = document.createElement("div");
                 noteElement.classList.add("note");
                 noteElement.style.fontSize = "8px";
                 noteElement.style.textAlign = "center";
                 noteElement.style.lineHeight = `${parseInt(cellSize) / 3}px`;
-                noteElement.textContent = notes.includes(note) ? note : ""; // Show note if it exists
+                noteElement.textContent = notes.includes(note) ? note : ""; // Display note if it exists
                 noteGrid.appendChild(noteElement);
             }
 
-            // Append input field and notes grid to the cell container
-            cellContainer.appendChild(inputField);
+            // Append the cell and notes grid to the container
+            cellContainer.appendChild(cellElement);
             cellContainer.appendChild(noteGrid);
 
-            // Append the cell container to the grid
+            // Append the container to the grid
             grid.appendChild(cellContainer);
         });
 
@@ -843,6 +857,7 @@
         updateNumberButtons(size);
         updateBorders();
     }
+
 
 
 
