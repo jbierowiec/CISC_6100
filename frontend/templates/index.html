@@ -276,7 +276,7 @@
         }
       }
 
-      // Jan 
+      /* Jan 
       // Function to undo the last move
       function undoMove() {
         if (moveHistory.length === 0) {
@@ -296,39 +296,88 @@
         }
 
         validateBoard(); // Re-validate the board after undoing the move
-      }
+      }*/
 
-      // Jonathan
+      // Jan
+      // Function to undo the last move
+      async function undoMove() {
+          const sessionId = localStorage.getItem("session_id");
+          
+          if (!sessionId) {
+              alert("Session ID is missing. Please restart the game.");
+              return;
+          }
+          
+          // Make a POST request to the Flask backend to undo the last move
+          const response = await fetch("/undo", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ session_id: sessionId }),
+          });
+          
+          /*const response = await fetch(`/undo?session_id=${sessionId}`, {
+            method: "POST",
+          });*/
+
+          const result = await response.json();
+
+          if (!response.ok) {
+              // Handle errors returned by the backend
+              alert(result.error || "An error occurred while undoing the move.");
+              return;
+          }
+
+          if (result.message === "No moves left to undo") {
+              alert(result.message);
+              return;
+          }
+
+          // Update the cell on the frontend with the previous value
+          const cell = document.querySelector(
+              `.cell[data-row="${result.row}"][data-col="${result.col}"]`
+          );
+          if (cell) {
+              cell.value = result.previous_value || ""; // Restore the cell's value
+          }
+
+          validateBoard(); // Re-validate the board after undoing the move
+}
+
+
+      // Jonathan/Mark
       // Function to undo until the last correct state of the game
       async function undoUntilCorrect() {
-        const response = await fetch(`/undoUntilCorrect`, {
-          method: "POST", 
-          headers: {
-            "Content-Type": "application/json", // Include the Content-Type header
-          },
-          body: JSON.stringify({}),
-        });
-
-        const data = await response.json();
-        const first_wrong = data.index;
-        const puzzle = data.puzzle;
-        puzzleResponse = await fetch(`/get_puzzle?session_id=${sessionId}`)
-        if (!puzzleResponse.ok) {
-          throw new Error("Failed to fetch puzzle from the server");
+        const sessionId = localStorage.getItem("session_id");
+          
+        if (!sessionId) {
+            alert("Session ID is missing. Please restart the game.");
+            return;
         }
         
-        const puzzleData = await puzzleResponse.json();
-        puzzle = puzzleData.cells
-        updateGrid(puzzle);
+        // Make a POST request to undo the last move
+        const response = await fetch("/undo_till_correct", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session_id: sessionId }),
+        });
+        
+        const result = await response.json();
 
-        for (
-          let index = moveHistory.length - 1;
-          index >= first_wrong;
-          index--
-        ) {
-          moveHistory.pop();
-        }
+        // Iterate over the cells to update on the frontend
+        result.cells_to_update.forEach(cell => {
 
+          const cellElement = document.querySelector(
+              `.cell[data-row="${cell.row}"][data-col="${cell.col}"]`
+          );
+          
+          // If the cell is found, update its value
+          if (cellElement) {
+              cellElement.value = cell.previous_value || "";  // Update the cell value
+          }
+      });
+
+        validateBoard();
+        
         // Reset the mistake counter
         mistakeCount = 0;
         document.getElementById(
@@ -571,19 +620,20 @@
       // Function to select a number from the number buttons and input it into a cell
       async function selectNumber(num) {
         if (selectedCell) {
-          //selectedCell.value = num;
-          // Store the previous value of the cell before changing it
-          const previousValue = selectedCell.value;
+          // Find the input element within the selected cell container
+          const inputElement = selectedCell.querySelector("input");
 
-          // Update the cell with the new number
-          selectedCell.value = num;
+          // Store the previous value of the cell before changing it
+          const previousValue = inputElement.value;
+
+          // Update the input field with the new number
+          inputElement.value = num;
 
           userRow = selectedCell.dataset.row;
           userCol = selectedCell.dataset.col;
 
           // Get the existing session_id from localStorage 
           const existingSessionId = localStorage.getItem('session_id'); 
-
           
           const updateResponse = await fetch("/update_cell", {
             method: "POST",
@@ -805,6 +855,7 @@
             cellElement.dataset.col = column;
             cellElement.value = value !== 0 ? value : ""; // Show empty for value 0
             cellElement.disabled = pre_filled; // Disable pre-filled cells
+            cellElement.readOnly = true; // Prevent typing in non-pre-filled cells
             cellElement.style.fontWeight = pre_filled ? "bold" : "normal";
             cellElement.style.textAlign = "center";
             cellElement.style.width = "100%";
@@ -857,10 +908,6 @@
         updateNumberButtons(size);
         updateBorders();
     }
-
-
-
-
 
       // Jan
       // Function to generate number buttons based on the grid size

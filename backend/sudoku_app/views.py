@@ -392,3 +392,100 @@ def get_notes(request):
         return JsonResponse({"error": "Session not found"}, status=404)
     except Cell.DoesNotExist:
         return JsonResponse({"error": "Cell not found"}, status=404)
+    
+#Mark
+@csrf_exempt
+def undo(request):
+    try:
+        # Get session ID from the request
+        data = json.loads(request.body)
+        session_id = data.get("session_id")
+
+        if not session_id:
+            return JsonResponse({"error": "Session ID is required."}, status=400)
+
+        # Fetch the session from the database
+        session = Sessions.objects.get(id=session_id)
+
+        # Get the most recent move from the history
+        last_move = History.objects.filter(session=session).order_by('-timestamp').first()
+
+        if not last_move:
+            return JsonResponse({"message": "No moves left to undo"})
+        
+        # Update the cell with the previous value
+        cell = last_move.cell
+        cell.value = last_move.previous_value
+        cell.save()
+
+        # Delete the history entry
+        last_move.delete()
+
+        # Return the cell information that was undone
+        return JsonResponse({
+            "message": "Move undone successfully.",
+            "row": cell.row,
+            "col": cell.column,
+            "previous_value": cell.value,  # The restored value
+        })
+
+    except Sessions.DoesNotExist:
+        return JsonResponse({"error": "Session not found."}, status=404)
+    
+@csrf_exempt
+def undo_till_correct(request):
+    try:
+        # Parse the request to get session_id
+        data = json.loads(request.body)
+        session_id = data.get("session_id")
+        
+        if not session_id:
+            return JsonResponse({"error": "Session ID is required."}, status=400)
+
+        # Fetch the session and history
+        session = Sessions.objects.get(id=session_id)
+        history = History.objects.filter(session=session).order_by('timestamp')
+
+        # Identify the first incorrect move
+        first_wrong_index = None
+        for index, move in enumerate(history):
+            if not move.correct_move:  # Check if the move is incorrect
+                first_wrong_index = index
+                break
+        
+        if first_wrong_index is None:
+            # If all moves are correct, return a message
+            return JsonResponse({"message": "All moves are correct."}, status=200)
+
+        #  Undo all moves after the first incorrect move
+        moves_to_undo = history[first_wrong_index:]  # Get all the incorrect moves and those after it
+        
+        cells_to_update = []  # List to store the cells that need to be updated
+
+        # Loop through the incorrect moves and undo them
+        for move in moves_to_undo:
+            # Update the board: Reset the cell to its previous value
+            cell = move.cell
+            cell.value = move.previous_value  # Restore the previous value
+            cell.save()
+
+            # Add the updated cell to the list
+            cells_to_update.append({
+                "row": cell.row,
+                "col": cell.column,
+                "previous_value": cell.value  # The restored value
+            })
+
+            # Delete the incorrect move from history
+            move.delete()
+
+        # Return the list of updated cells
+        return JsonResponse({
+            "message": "Moves undone successfully.",
+            "cells_to_update": cells_to_update  # Return the cells that were updated
+        }, status=200)
+        
+    except Sessions.DoesNotExist:
+        return JsonResponse({"error": "Session not found."}, status=404)
+    except History.DoesNotExist:
+        return JsonResponse({"error": "History not found for the session."}, status=404)

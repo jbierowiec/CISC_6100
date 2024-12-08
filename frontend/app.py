@@ -210,6 +210,33 @@ def setNote():
         return jsonify(response.json())
     else:
         return jsonify({"error": response.json().get("error", "Failed to update notes")}), response.status_code
-        
+
+#Mark
+@app.route('/undo', methods=['POST'])
+def undo():
+    # Extract the session ID from the incoming request
+    session_id = request.json.get("session_id")
+    if not session_id:
+        return jsonify({"error": "Session ID is required."}), 400
+    
+    response = requests.post(f"{BACKEND_URL}/undo/", json={"session_id": session_id})
+
+    return jsonify(response.json()), response.status_code
+
+@app.route('/undo_till_correct', methods=['POST'])
+def undo_till_correct():
+    #get sesson ID from request
+    session_id = request.json.get("session_id")
+    if not session_id:
+        return jsonify({"error": "Session ID is required."}), 400
+    
+    response = requests.post(f"{BACKEND_URL}/undo_till_correct/", json={"session_id": session_id})
+
+    # If the request succeeds, return the response
+    if response.ok:
+        return jsonify(response.json()), response.status_code
+    else:
+        return jsonify({"error": "Failed to contact backend"}), 500
+
 if __name__ == '__main__':
     app.run(debug=True)

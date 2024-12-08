@@ -13,4 +13,6 @@ urlpatterns = [
     path('get_notes/', views.get_notes, name="get_notes"),
     path('get_history/', views.get_history, name="get_history"),
     path('update_history/', views.update_history, name="update_history"),
+    path('undo/', views.undo, name="undo"),
+    path('undo_till_correct/', views.undo_till_correct, name="undo_till_correct"),
 ]

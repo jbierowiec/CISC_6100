@@ -124,6 +124,7 @@ body.dark-mode button:nth-of-type(6) {
   color: #ddd;
 }
 
+
 /* Grid styling */
 #sudoku-grid {
   display: grid;
