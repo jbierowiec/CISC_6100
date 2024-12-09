@@ -169,6 +169,10 @@ body.dark-mode button:nth-of-type(6) {
   color: blue;
 }
 
+.incorrect-cell {
+  background-color: #ffcccc;
+}
+
 .note {
   font-size: 6px; /* 1/3 of 18px */
   display: grid;

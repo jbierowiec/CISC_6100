@@ -581,7 +581,9 @@
         let hasMistakes = false;
 
         document.querySelectorAll(".cell").forEach((cell) => {
+          cell.classList.remove("incorrect-cell"); // Remove incorrect-cell class
           cell.style.backgroundColor = ""; // Reset background color
+
         });
 
         for (let row = 0; row < gridSize; row++) {
@@ -751,59 +753,67 @@
         return true;
       }
 
-      // Jan / Jonathan
+      // Jan / Jonathan / Mark
       // Function to check solution of the board
       async function checkSolution() {
         const puzzleSize = parseInt(document.getElementById("puzzleSize").value);
-        const userSolution = [];
-
-        for (let i = 0; i < puzzleSize; i++) {
-          const row = [];
-          for (let j = 0; j < puzzleSize; j++) {
-            const cell = document.querySelector(
-              `.cell[data-row="${i}"][data-col="${j}"]`
-            );
-            if (cell) {
-              const value = parseInt(cell.value) || 0;
-              row.push(value);
-            } else {
-              row.push(0);
-            }
-          }
-          userSolution.push(row);
-        }
-        
-        //fetch the sessionId from the local storage
         const sessionId = localStorage.getItem("session_id");
+
         if (!sessionId) {
-          alert("Session ID is not available. Please restart the game.");
-          return;
+            alert("Session ID is not available. Please restart the game.");
+            return;
         }
 
-        //fetch the puzzle data using the session id
-        puzzleResponse = await fetch(`/get_puzzle?session_id=${sessionId}`)
+        // Fetch the puzzle data using the session ID
+        const puzzleResponse = await fetch(`/get_puzzle?session_id=${sessionId}`);
         if (!puzzleResponse.ok) {
-          throw new Error("Failed to fetch puzzle from the server");
+            alert("Failed to fetch puzzle from the server.");
+            return;
         }
-        
+
         const puzzleData = await puzzleResponse.json();
-        const solution = puzzleData.solution;
-        const status = boardsEqual(userSolution, solution)
-        /* const response = await fetch("/check_solution", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ solution: solution }),
-        }); */
+        const cells = puzzleData.cells; // Current state of the cells
 
-        /* const result = await response.json(); */
+        let allCorrect = true; // Flag to check if all cells are correct
+        let boardComplete = true; // Flag to check if the board is completely filled
+        let incorrectCells = []; // List to track any incorrect cells
 
-        if (status) {
-          alert("Sudoku has been solved!");
-          stopTimer(); // Stop the timer when the solution is correct
-          gameSolved = true; // Set the flag to indicate the game is solved
-        } else {
-          alert("Incorrect solution.");
+        cells.forEach(cell => {
+            // Check only non-prefilled cells
+            if (!cell.pre_filled) {
+                if (cell.value === 0) {
+                    boardComplete = false; // Board is not complete if any cell is unfilled
+                } else if (cell.value !== cell.solution) {
+                    allCorrect = false; // Incorrect value found
+                    incorrectCells.push({ row: cell.row, column: cell.column }); // Record incorrect cell
+                }
+            }
+        });
+
+        // Provide feedback to the user
+        if (allCorrect && boardComplete) {
+            alert("Sudoku has been solved!");
+            stopTimer(); // Stop the timer when the solution is correct
+            gameSolved = true; // Set the flag to indicate the game is solved
+        } else if (!allCorrect) {
+            alert("Some non-prefilled cells are incorrect. Please review your entries.");
+            highlightIncorrectCells(incorrectCells); // Highlight incorrect cells
+        } else if (!boardComplete) {
+            alert("The puzzle is not yet complete.");
         }
+      }
+
+      // Mark
+      // helper function to highlight incorrect cells -- NOT INVALID CELLS
+      function highlightIncorrectCells(incorrectCells) {
+        incorrectCells.forEach(cell => {
+            const cellElement = document.querySelector(
+                `.cell[data-row="${cell.row}"][data-col="${cell.column}"]`
+            );
+            if (cellElement) {
+                cellElement.classList.add("incorrect-cell"); // Add a CSS class for styling
+            }
+        });
       }
 
       // Jan
