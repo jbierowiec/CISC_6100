@@ -1,12 +1,12 @@
 # SWE Sudoku Project
 
-This repository contains the source code for the Software Engineering Sudoku Project. The application is built using Flask for the frontend and Django for the backend, with the website designed to be dynamic and responsive, ensuring compatibility with both personal computers and mobile devices.
+This repository contains the source code for the Software Engineering Sudoku Project. The application is built using Flask for the frontend and Django for the backend, with the website designed to be dynamic and responsive, ensuring compatibility with both personal computers and mobile devices. The games are stored in a SQLite database.
 
 ---
 
 ## Overview
 
-The Sudoku Project is a web-based application that provides users with a customizable Sudoku experience. Users can select the difficulty, switch between light and dark mode, and track their game progress using an integrated timer.
+The Sudoku Project is a web-based application that provides users with a customizable Sudoku experience. Users can select the difficulty, board size, switch between light and dark mode, track their game progress using an integrated timer, and integrate with the game with the Undo, Undo Until Correct, Get Specifc Hint, Get Random Hint, Check Solution, Create New Game, Set Note and the Clear Note buttons. 
 
 ---
 
@@ -39,8 +39,7 @@ The Sudoku Project is a web-based application that provides users with a customi
 │   │   └── style.css
 │   ├── templates
 │   │   └── index.html
-├── app.py
-└── games.json
+└── app.py
 ```
 
 ## Features
@@ -54,10 +53,14 @@ The Sudoku Project is a web-based application that provides users with a customi
 - **Pause on Inactivity**: The timer pauses whenever the user switches to another browser tab or clicks the "Check Solution" button.
 
 ### Generate New Game Button
-- **Difficulty-Based Game Selection**: The "Generate New Game" button fetches games from a `games.json` file, based on the selected difficulty. This file contains:
+- **Difficulty-Based Game Selection**: The "Generate New Game" button fetches games from a `db.sqlite3` file, the data was previously held in a `games.json` file, however due to the SQLite being a better data model to store our games, it was decided to switch over to this model allowing for seamless Backend and Frontend communication. This file contains:
   - **Empty Cell Layouts**: Pre-made Sudoku games with varying levels of difficulty.
   - **Solutions**: Complete solutions for each Sudoku game.
   - **Difficulty Levels**: Easy, Medium, and Hard levels, only in 4x4 grids. (9x9 grids with sudoku games, solutions, levels, and a toggle to choose this size should be implemented)
+  - **Game ID**: A unique ID for each game.
+  - **Notes**: 
+  - **History**: An array that stores the game history
+  - **Sessions**: 
 
 ### Check Solution Button
 - **Validation Against Stored Solutions**: Each Sudoku game is pre-generated and stored in a JSON file, including the solution. When the user clicks "Check Solution," the system verifies if the user’s inputs match the correct solution from the backend.

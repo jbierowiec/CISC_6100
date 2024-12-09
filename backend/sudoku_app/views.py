@@ -114,6 +114,8 @@ def new_session(request):
         return JsonResponse({"error": "No puzzle available"})
     
 """ @csrf_exempt
+# Jan 
+# Function to check the solution
 def check_solution(request):
     if request.method == "POST":
         user_solution = json.loads(request.body).get("solution")
@@ -456,7 +458,8 @@ def undo(request):
 
     except Sessions.DoesNotExist:
         return JsonResponse({"error": "Session not found."}, status=404)
-    
+
+# Jonathan
 @csrf_exempt
 def undo_till_correct(request):
     try:
