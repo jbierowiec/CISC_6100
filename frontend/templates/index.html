@@ -53,6 +53,7 @@
       <button onclick="getHint()">Get Specific Hint</button>
       <button onclick="getRandomHint()">Get Random Hint</button>
       <button onclick="note()">Set Note</button>
+      <button onclick="clearNotes()">Clear Note</button>
       <!-- 
       <button id="set-note-button" onclick="toggleSetNote()">
         Set Note: Off
@@ -107,16 +108,16 @@
           const newSessionID = data.new_session_id 
           console.log(newSessionID);
 
-          localStorage.setItem("session_id", newSessionID); // set the new session id if one was created
+          localStorage.setItem("session_id", newSessionID); 
         
-          puzzleResponse = await fetch(`/get_puzzle?session_id=${newSessionID}`) // get the puzzle from the session
+          puzzleResponse = await fetch(`/get_puzzle?session_id=${newSessionID}`) 
           const puzzleData = await puzzleResponse.json();
           
           updateGrid(puzzleData.cells);
       });
 
       //Jonathan
-      //this is what is directly called fromm the button. Thuis takes all the values we need then passes it to the async function to set the backend notes
+      //this is what is directly called from the button. This takes all the values we need then passes it to the async function to set the backend notes
       function note(){
         console.log(selectedCell)
         if (selectedCell) {
@@ -139,7 +140,7 @@
       async function setNote(row, col, noteValue) {
         const session_id = localStorage.getItem("session_id");
         try {
-          const response = await fetch("/set_note/", {
+          const response = await fetch("/setNote", {
               method: "POST",
               headers: {
                   "Content-Type": "application/json",
@@ -156,12 +157,26 @@
               throw new Error("Failed to update note in backend");
           }
 
-          const data = await response.json();
-          if (data.success) {
+          const response2 = await fetch("/getNotes", {
+            method: "POST", 
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                session_id: session_id, 
+                row: row,             
+                column: col,       
+            }),
+          });
+
+          const data2 = await response2.json();
+          const notes = data2["notes"]
+          console.log("Notes fetched successfully:", notes);
+          if (notes) {
               // Call the function to update the UI with the new notes
-              updateNotes(row, col, data.notes);
+              updateNotes(row, col, notes);
           } else {
-              console.error("Backend update failed:", data.error);
+              console.error("Cannot retrieve notes:", data.error);
           }
         } catch (error) {
             console.error("Error updating note in backend:", error);
@@ -169,29 +184,78 @@
       }
 
       //Jonathan
-      // note to mark and jan: this is probably where I need help. when this is called the note should already be set in the backend but I'm not great at front end stuff
-      //this function should just upgrade the grid to display the notes passes in in the row and col passed ins
+      // updates the notes in the ui
       function updateNotes(row, col, notes) {
+        if (!Array.isArray(notes)) {
+            console.error("Invalid notes data:", notes);
+            return;
+        }
+
         const cellContainer = document.querySelector(
             `.cell-container[data-row="${row}"][data-col="${col}"]`
         );
-        if (!cellContainer) return;
+        if (!cellContainer) {
+            console.error("Cell container not found for row:", row, "col:", col);
+            return;
+        }
 
         const noteGrid = cellContainer.querySelector(".notes-grid");
-        if (!noteGrid) return;
+        if (!noteGrid) {
+            console.error("Notes grid not found for cell at row:", row, "col:", col);
+            return;
+        }
 
-        // Clear the existing notes
         noteGrid.innerHTML = "";
 
-        // Add the updated notes
         for (let note = 1; note <= 9; note++) {
             const noteElement = document.createElement("div");
             noteElement.classList.add("note");
+            noteElement.textContent = notes.includes(note) ? note : ""; 
             noteElement.style.fontSize = "8px";
             noteElement.style.textAlign = "center";
             noteElement.style.lineHeight = `${noteGrid.clientHeight / 3}px`;
-            noteElement.textContent = notes.includes(note) ? note : ""; // Show the note if it exists
             noteGrid.appendChild(noteElement);
+        }
+
+        console.log("Notes updated successfully for cell:", { row, col, notes });
+      }
+
+      //Jonathan
+      //Clears all the notes both in the database and in the ui
+      async function clearNotes() {
+        const session_id = localStorage.getItem("session_id");
+
+        try {
+            const response = await fetch("/clearNotes", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    session_id: session_id,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to clear notes in backend");
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                console.log(data.message);
+
+                document.querySelectorAll(".cell-container").forEach((cellContainer) => {
+                    const row = parseInt(cellContainer.dataset.row);
+                    const col = parseInt(cellContainer.dataset.col);
+
+                    updateNotes(row, col, []);
+                });
+            } else {
+                console.error("Backend error:", data.error);
+            }
+        } catch (error) {
+            console.error("Error clearing all notes:", error);
         }
       }
 

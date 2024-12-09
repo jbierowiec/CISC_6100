@@ -363,12 +363,16 @@ def set_note(request):
     try:
         data = json.loads(request.body)
         session_id = data.get("session_id")
-        note = data.get("note_value")
+        note = int(data.get("note_value"))
         row = data.get("row")
         column = data.get("column")
         session = Sessions.objects.get(id=session_id)
         cell = Cell.objects.get(session=session, row=row, column=column)
-        cell.notes.append(int(note))
+        if note not in cell.notes:  # Only add the note if it's not already present
+            cell.notes.append(note)
+            cell.save()
+        
+        cell.save()
         return JsonResponse({"success": True, "message": "Notes updated successfully"})
     except Sessions.DoesNotExist:
         return JsonResponse({"error": "Session not found"}, status=404)
@@ -381,18 +385,39 @@ def get_notes(request):
     try:
         data = json.loads(request.body)
         session_id = data.get("session_id")
-        note = data.get("note_value")
-        row = data.get("row")
-        column = data.get("column")
+        row = int(data.get("row"))
+        column = int(data.get("column"))
         session = Sessions.objects.get(id=session_id)
         cell = Cell.objects.get(session=session, row=row, column=column)
-        notes = cell.notes
+        notes = cell.notes or []
         return JsonResponse({"notes": notes})
     except Sessions.DoesNotExist:
         return JsonResponse({"error": "Session not found"}, status=404)
     except Cell.DoesNotExist:
         return JsonResponse({"error": "Cell not found"}, status=404)
-    
+
+@csrf_exempt
+def clear_notes(request):
+    try:
+        # Parse the request body
+        data = json.loads(request.body)
+        session_id = data.get("session_id")
+
+        if not session_id:
+            return JsonResponse({"error": "Session ID is required"}, status=400)
+
+        # Fetch the session
+        session = Sessions.objects.get(id=session_id)
+
+        # Clear the notes for all cells in the session
+        cells = Cell.objects.filter(session=session)
+        cells.update(notes=[])  # Set the notes field to an empty list for all cells
+
+        return JsonResponse({"success": True, "message": "All notes cleared successfully"})
+    except Sessions.DoesNotExist:
+        return JsonResponse({"error": "Session not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": f"An unexpected error occurred: {str(e)}"}, status=500)
 #Mark
 @csrf_exempt
 def undo(request):

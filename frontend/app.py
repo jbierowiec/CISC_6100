@@ -205,11 +205,41 @@ def setNote():
         f"{BACKEND_URL}/set_note/",
         json={"session_id": session_id, "row": row, "column": column, "note_value": note_value},
     )
-
     if response.ok:
-        return jsonify(response.json())
+        return jsonify({"success": True, "message": "Notes updated successfully"})
     else:
-        return jsonify({"error": response.json().get("error", "Failed to update notes")}), response.status_code
+        return jsonify({"error": response.json().get("error", "Failed to update notes")}, response.status_code)
+
+#Jonathan
+@app.route('/getNotes', methods=['POST'])
+def getNotes():
+    data = request.json
+    session_id = data.get("session_id")
+    row = data.get("row")
+    column = data.get("column")
+    response = requests.post(
+        f"{BACKEND_URL}/get_notes/",
+        json={"session_id": session_id, "row": row, "column": column},
+    )
+    data = response.json()
+    notes = data.get("notes")
+    return jsonify({"notes": notes})
+
+#Jonathan
+@app.route('/clearNotes', methods=['POST'])
+def clearNotes():
+    data = request.json
+    session_id = data.get("session_id")
+    response = requests.post(
+        f"{BACKEND_URL}/clear_notes/",
+        json={"session_id": session_id},
+    )
+    if response.ok:
+        return jsonify({"success": True, "message": "Notes cleared successfully"})
+    else:
+        return jsonify({"error": response.json().get("error", "Failed to clear notes")}, response.status_code)
+
+
 
 #Mark
 @app.route('/undo', methods=['POST'])
