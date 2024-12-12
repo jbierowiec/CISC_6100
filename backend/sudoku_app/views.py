@@ -81,6 +81,14 @@ def new_session(request):
     games = SudokuGames.objects.filter(size = 4, difficulty = "easy") 
     current_puzzle = random.choice(games)
     
+    existing_id = request.GET.get('session_id', 0) # Pass session_id from the frontend, default to 0 if not
+    
+    # Check for an existing session and delete it
+    if existing_id != 0:
+        existing_sessions = Sessions.objects.filter(id=existing_id)
+        if existing_sessions.exists():
+            existing_sessions.delete()
+
     # Create a new session for the first game
     session = Sessions.objects.create(sudoku_game=current_puzzle) # relates a random game to the new session
     

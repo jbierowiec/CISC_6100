@@ -340,28 +340,6 @@
         }
       }
 
-      /* Jan 
-      // Function to undo the last move
-      function undoMove() {
-        if (moveHistory.length === 0) {
-          alert("No moves to undo.");
-          return;
-        }
-
-        // Get the last move from the history
-        const lastMove = moveHistory.pop();
-
-        // Find the cell and set it back to empty
-        const cell = document.querySelector(
-          `.cell[data-row="${lastMove.row}"][data-col="${lastMove.col}"]`
-        );
-        if (cell) {
-          cell.value = lastMove.previousValue || ""; // Clear the cell's value
-        }
-
-        validateBoard(); // Re-validate the board after undoing the move
-      }*/
-
       // Jan
       // Function to undo the last move
       async function undoMove() {
@@ -406,7 +384,6 @@
 
           validateBoard(); // Re-validate the board after undoing the move
 }
-
 
       // Jonathan/Mark
       // Function to undo until the last correct state of the game
@@ -884,7 +861,7 @@
         });
       }
 
-      // Jan
+      // Jan / Mark / Jonathan
       // Function that updates the status of the grid
       function updateGrid(cells) {
         const size = Math.sqrt(cells.length); // Determines grid size (e.g., 4x4, 9x9, 16x16)

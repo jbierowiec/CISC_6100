@@ -42,11 +42,10 @@ def get_puzzle():
 @app.route('/get_session', methods = ['GET'])
 def get_session():    
     current_session_id = request.args.get('session_id') 
-    if (current_session_id == '0'):
-        new_session= requests.get(f"{BACKEND_URL}/new_session/").json()
-        return jsonify({"new_session_id": new_session["session_id"]})
-    else:
-        return jsonify({"new_session_id": current_session_id})
+    
+    new_session= requests.get(f"{BACKEND_URL}/new_session/", params={"session_id": current_session_id}).json()
+    return jsonify({"new_session_id": new_session["session_id"]})
+
 
 """ # Jan
 @app.route('/check_solution', methods=['POST'])
@@ -97,6 +96,7 @@ def get_hint():
    except IndexError:
        return jsonify({"error": "Invalid cell position"}), 400 """
 
+# Mark
 @app.route('/update_cell', methods=['POST'])
 def update_cell():
     # Parse the JSON data from the request
@@ -150,43 +150,6 @@ def isCorrect():
         current_board[int(row)][int(col)] = int(userValue)  # Update the board with the new value
 
     return jsonify({"correct": isCorrect})
-
-# Jonathan
-@app.route('/undoUntilCorrect', methods=['POST'])
-def undoUntilCorrect():
-    data = request.json
-    session_id = data.get("session_id")
-    response = requests.post(
-        f"{BACKEND_URL}/get_history/",
-        json={"session_id": session_id },
-    )
-    history = response.history
-    first_wrong = len(history) + 1
-    # Find the index of the first incorrect move
-    for index, move in enumerate(HISTORY):
-        if not move.correct:
-            first_wrong = index
-            break
-
-    # Reset the spots on the board for moves after the first_wrong index
-    for index in range(first_wrong, len(HISTORY)):
-        cell = history[index].cell
-        # Reset the spot to 0
-        current_board[cell.row][cell.column] = 0
-        response = requests.post(
-            f"{BACKEND_URL}/reset_cell/",
-            json={"session_id": session_id, "row": cell.row, "column": cell.column},
-        )
-        history.pop()
-    # Keep only the moves up to the first_wrong index in HISTORY
-    response = requests.post(
-        f"{BACKEND_URL}/update_history/",
-        json={ "session_id": session_id, "history": history },
-    )
-    if(not response.ok):
-        return jsonify({"error": response.json().get("error", "Failed to undo moves")}), response.status_code
-    else:
-        return jsonify({"puzzle": current_board, "first_wrong": first_wrong})
 
 #Jonathan
 @app.route('/setNote', methods=['POST'])
@@ -253,6 +216,7 @@ def undo():
 
     return jsonify(response.json()), response.status_code
 
+#Mark
 @app.route('/undo_till_correct', methods=['POST'])
 def undo_till_correct():
     #get sesson ID from request
