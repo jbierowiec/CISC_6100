@@ -127,7 +127,7 @@
         updateGrid(puzzleData.cells);
       });
 
-      //Jonathan
+      //Jonathan & Jan
       //this is what is directly called from the button. This takes all the values we need then passes it to the async function to set the backend notes
       function note() {
         console.log(selectedCell);
@@ -137,7 +137,8 @@
           const puzzleSize = parseInt(
             document.getElementById("puzzleSize").value
           );
-          const value = prompt("Enter a note value (1-9):");
+          const gridSize = document.getElementById("puzzleSize").value; // Get the grid size dynamically
+          const value = prompt(`Enter a note value (1-${gridSize}):`); 
           if (value && !isNaN(value) && value >= 1 && value <= puzzleSize) {
             setNote(row, col, parseInt(value));
           } else {
@@ -196,8 +197,8 @@
         }
       }
 
-      //Jonathan
-      // updates the notes in the ui
+      //Jonathan & Jan
+      // updates the notes in the UI
       function updateNotes(row, col, notes) {
         if (!Array.isArray(notes)) {
           console.error("Invalid notes data:", notes);
@@ -225,13 +226,31 @@
 
         noteGrid.innerHTML = "";
 
-        for (let note = 1; note <= 9; note++) {
+        const gridSize = parseInt(document.getElementById("puzzleSize").value);
+
+        let subGridSize;
+        if (gridSize === 4) {
+          subGridSize = 2;
+        } else if (gridSize === 9) {
+          subGridSize = 3;
+        } else if (gridSize === 16) {
+          subGridSize = 4;
+        }
+
+        noteGrid.style.display = "grid";
+        noteGrid.style.gridTemplateColumns = `repeat(${subGridSize}, 1fr)`;
+        noteGrid.style.gridTemplateRows = `repeat(${subGridSize}, 1fr)`;
+
+        const cellHeight = noteGrid.clientHeight / subGridSize;
+        const fontSize = Math.min(cellHeight * 0.6, 20);
+
+        for (let note = 1; note <= gridSize; note++) {
           const noteElement = document.createElement("div");
           noteElement.classList.add("note");
           noteElement.textContent = notes.includes(note) ? note : "";
-          noteElement.style.fontSize = "8px";
+          noteElement.style.fontSize = `${fontSize}px`;
           noteElement.style.textAlign = "center";
-          noteElement.style.lineHeight = `${noteGrid.clientHeight / 3}px`;
+          noteElement.style.lineHeight = `${cellHeight}px`;
           noteGrid.appendChild(noteElement);
         }
 
@@ -239,6 +258,7 @@
           row,
           col,
           notes,
+          gridSize,
         });
       }
 
