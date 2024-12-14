@@ -2,11 +2,23 @@
 
 This repository contains the source code for the Software Engineering Sudoku Game Project. The application is built using Flask for the frontend and Django for the backend, with the website designed to be dynamic and responsive using HTML and CSS, ensuring compatibility with both personal computers and mobile devices. The database that stores all the sudoku games is a SQLite database.
 
+## Full Stack Digram 
+
+![Full Stack Diagram](diagrams/FullStack%20Diagram.png)
+
 ---
 
 ## Overview
 
 The Sudoku Game Project is a web-based application that provides users with a unique Sudoku experience. Users can select the game difficulty, board size, switch between light and dark mode, track their game progress with an integrated timer, and interact with the game through its numerous buttons, featuring the: Undo, Undo Until Correct, Get Specifc Hint, Get Random Hint, Check Solution, Create New Game, Set Note and the Clear Note buttons. 
+
+## Story Board Diagram
+
+Here are our story board of how we envisioned for the Sudoku game to look like, as well as the in game play features:
+
+![Story Board of a 4x4 Sudoku Game](diagrams/Story%20Board%204x4.png)
+
+![Story Board of a 9x9 Sudoku Game in play](diagrams/Story%20Board%209x9%20Game%20Play.png)
 
 ---
 
@@ -48,6 +60,8 @@ The Sudoku Game Project is a web-based application that provides users with a un
   - **Cells**: A method of storing information about a cell, whether it was a prefilled (generated) cell, and empty cell, where the cell is located with respect to the entire board grid, the value that it has, the solution for all the empty cells as well as an ability to enter notes on a cell
   - **History**: This includes information about a session, a value that is entered into an empty cell, previous values entered into previously entered cells, a timestamp of when moves are made, as well as a flas that determines if a move made by the user is correct or not.
   - **Notes**: This allows the user to enter multiple values into any given empty cell in such a way that the value is smaller than the rest and it can be cleared. 
+
+![Database Schema](diagrams/Database_Schema.jpg)
 
 ## Features
 
@@ -110,6 +124,14 @@ The Sudoku Game Project is a web-based application that provides users with a un
 - If the user enters any value in a cell where the row, column, or 2x2, 3x3, or 4x4 square (depending on the game board size) contains that same value, the cells where there are duplicates will turn red indicating an error in sudoku logic, meaning the user will have to input a different value in order to proceed in continuing the sudoku game.
 - If the user makes three such mistakes in the game, a message box will come up notifying the user that they have lost the game, displaying a 10 second timer that decerements down. Once complete, a new game is loaded onto the scree.
 - If the user has incorreclty inputted values in the game, and they click on the "Check Solution" button, they will be notified that their inputed are incorrect. 
+
+### Validating a Value
+
+![Validating a Value](diagrams/Validating%20a%20Value.png)
+
+### Use Case Diagram
+
+![General Use Case Diagram](diagrams/High%20Level%20Use%20case%20diagram.png)
 
 ---
 
