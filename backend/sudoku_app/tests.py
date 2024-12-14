@@ -4,6 +4,8 @@ from .models import Sessions, SudokuGames, Cell
 from .views import new_game, is_correct 
 
 # Create your tests here.
+
+#Jan
 class SudokuGamesModelTest(TestCase):
     def setUp(self):
         self.game = SudokuGames.objects.create(
@@ -18,6 +20,7 @@ class SudokuGamesModelTest(TestCase):
         self.assertEqual(self.game.difficulty, 'easy')
         self.assertEqual(self.game.size, 2)
 
+#Jan
 class CellModelTest(TestCase):
     def setUp(self):
         self.game = SudokuGames.objects.create(
@@ -36,6 +39,7 @@ class CellModelTest(TestCase):
         self.assertEqual(self.cell.solution, 1)
         self.assertFalse(self.cell.pre_filled)
 
+#Jan
 class SudokuViewsTest(TestCase):
     def setUp(self):
         self.client = Client()
@@ -57,6 +61,7 @@ class SudokuViewsTest(TestCase):
         }, content_type='application/json')
         self.assertEqual(response.status_code, 404)
 
+#Jan
 class URLTests(TestCase):
     def test_new_game_url(self):
         url = reverse('new_game')
