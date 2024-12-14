@@ -135,7 +135,11 @@ Here are our story board of how we envisioned for the Sudoku game to look like, 
 
 ### Activity Diagram
 
-![Undo Until Correct Activity Diagram](diagrams/Activity%diagram%UndoTillCorrect.pdf)
+![Undo Until Correct Activity Diagram](diagrams/Activity%diagram%UndoTillCorrect.png)
+
+### Sequence Diagram
+
+![Undo Sequence Diagram](diagrams/Sequence%diagram%Undo%By%Mark.jpg)
 
 ---
 
