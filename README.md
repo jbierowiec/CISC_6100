@@ -42,7 +42,7 @@ The Sudoku Game Project is a web-based application that provides users with a un
 └── app.py
 ```
 
-### Database 
+## Database 
   - **Sudoku Games**: This includes pre-made Sudoku games with varying levels of difficulty, sizes, as well as solutions. 
   - **Sessions**: This includes the ability for there to be multiple sessions or instances of the same game to be running on a different browser with a uniquey generated ID
   - **Cells**: A method of storing information about a cell, whether it was a prefilled (generated) cell, and empty cell, where the cell is located with respect to the entire board grid, the value that it has, the solution for all the empty cells as well as an ability to enter notes on a cell
@@ -150,8 +150,10 @@ To start the backend and frontend servers, follow these steps:
 - Originally most of the buttons fetched data from a `games.json` file. Since then, the code has been refactored in considering multiple games running in different sessions, as well as optimizing the database, the data is now fetched from a `db.sqlite3` file. This decision was made due to SQLite being a better data model to store our games, as well as it allowing for seamless Backend and Frontend communication. 
 - Original functions that were related to the `games.json` file have either been deleted or adjusted accordingly when the refactoring process was done. 
 
+---
+
 ## Testing 
-- FWe have done the following tests during the course of the project:
+- We have done the following tests during the course of the project:
   **Unit Testing:** We tested individual functions or components to ensure they behave as expected. For example: 
   - We validated the sudoku grid via enforcing row, column, and subgrid uniqueness.
   - We tested the undo and undo until correct buttons to see if the incorrect moves would be popped.
@@ -167,7 +169,6 @@ To start the backend and frontend servers, follow these steps:
   - We used `pytest-django` or `pytest-flask` to test database interactions.
 
 ---
-
 
 ## Individual Contributions
 - We all tweaked most parts of the code at some point, but here is what we were each primarily responsible for developing the Sudoku Game:
@@ -195,7 +196,9 @@ To start the backend and frontend servers, follow these steps:
     - Added a route to the backend to clear history data for a cell. 
     - Began work on the undo/undo untill correct, though I later pivoted away from that and it was reworked/added to by Mark. 
 
-### Previously Documented Work Throughout the Project Semester
+---
+
+# Previously Documented Work Throughout the Project Semester
 
 ## Notes
 - The games are stored in `games.json` and contain information on each game's grid layout, solutions, and difficulty level.
@@ -240,3 +243,5 @@ To start the backend and frontend servers, follow these steps:
 - Home page where the user enters their name and also clicks on a size and difficulty. They should then be redirected to the game page (don't just have one game page with all the buttons and user choices there)
 - Generate New Game button reloads the Backend to include that specifc game so that the Check Solution Button will work along with all other buttons
 - The HTML file is currently 700 lines long with the combination of HTML and JavaScript on the file, for better file structure, it would be better to create a separate JavaScript file containing the functionality and separate directory for the index and game pages when both pages are implemented
+
+---
