@@ -1,4 +1,3 @@
-/* Center the entire layout */
 body {
   display: flex;
   flex-direction: column;
@@ -6,7 +5,21 @@ body {
   font-family: Arial, sans-serif;
   background-color: #f3f4f6;
   margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%; /* Adjust the width based on screen size */
+  max-width: 1200px; /* Prevent it from growing too large */
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
 
 /* Title styling */
 h1 {
@@ -23,22 +36,21 @@ h1 {
   margin-bottom: 20px;
 }
 
-/* Bottom controls container for inline layout */
 .bottom-controls {
-  display: flex;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, auto);
-  gap: 10px 30px;
-  justify-content: space-evenly;
-  justify-items: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 buttons per row */
+  gap: 10px; /* Spacing between buttons */
+  justify-content: center; /* Center the grid */
   padding: 20px;
-  width: 500px;
-  box-sizing: border-box;
- }
+  max-width: 75%; /* Ensure it spans the available width */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
 
 .bottom-controls button {
-  margin-bottom: 5px;
+  width: 100%; /* Make buttons span their grid cell */
+  padding: 10px; /* Adjust padding for button size */
 }
+
 
 /* Timer styling */
 #timer {
@@ -72,35 +84,57 @@ button:hover {
   opacity: 0.9;
 }
 
+button:disabled {
+  background-color: #ccc; 
+  color: #666; 
+  cursor: not-allowed; 
+}
+
 /* Button colors */
 button#theme-toggle {
   background-color: #787aeb;
   color: #fff;
 }
+
 button:nth-of-type(1) {
   background-color: #38bdf8;
   color: #fff;
-} /* Check Solution */
+}
+
 button:nth-of-type(2) {
   background-color: #4ade80;
   color: #fff;
-} /* New Game */
+} 
+
 button:nth-of-type(3) {
   background-color: #f87171;
   color: #fff;
-} /* Undo */
+} 
+
 button:nth-of-type(4) {
+  background-color: #e1cd1e;
+  color: #fff;
+} 
+
+button:nth-of-type(5) {
   background-color: #38bdf8;
   color: #fff;
-} /* Check Solution */
-button:nth-of-type(5) {
+} 
+
+button:nth-of-type(6) {
   background-color: #4ade80;
   color: #fff;
-} /* New Game */
-button:nth-of-type(6) {
+} 
+
+button:nth-of-type(7) {
   background-color: #f87171;
   color: #fff;
-} /* Undo */
+} 
+
+button:nth-of-type(8) {
+  background-color: #e1cd1e;
+  color: #fff;
+} 
 
 /* Dark mode button colors */
 body.dark-mode button#theme-toggle {
@@ -260,12 +294,13 @@ body.dark-mode .grid-container .cell {
 }
 
 .number-controls button {
-  width: 50px;
+  width: 100%;
   height: 50px;
   font-size: 1.5em;
   background-color: #aad6f2; /* Green color */
   color: #fff;
-  border: none;
+  border: 1px solid #ccc;
+  text-align: center;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -300,4 +335,66 @@ body.dark-mode .number-controls button:hover {
   justify-content: center;
   align-items: center;
   pointer-events: auto; /* Allow clicking on notes */
+}
+
+@media screen and (max-width: 1024px) {
+  .number-controls button {
+    height: 50px; 
+    width: 50px;
+    font-size: 1.5em; 
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .top-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  #timer, #difficulty, #puzzleSize, #theme-toggle {
+    min-width: 100%; /* Stack elements vertically */
+    margin-bottom: 10px;
+  }
+
+  .number-controls button {
+    height: 40px; 
+    width: 40px;
+    font-size: 1.2em; 
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .bottom-controls button,
+  .number-controls button {
+    font-size: 0.9rem; /* Adjust button text size */
+    padding: 8px;
+  }
+
+  .cell {
+    width: 25px; /* Smaller grid cells */
+    height: 25px;
+    font-size: 0.8rem;
+  }
+
+  .number-controls button {
+    height: 40px; 
+    width: 40px;
+    font-size: 1.2em; 
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .number-controls button {
+    height: 30px; 
+    width: 30px;
+    font-size: 1em; 
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .number-controls button {
+    height: 15px; 
+    width: 15px;
+    font-size: 0.5em; 
+  }
 }
