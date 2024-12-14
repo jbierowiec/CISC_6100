@@ -190,6 +190,24 @@ To start the backend and frontend servers, follow these steps:
   - We also tested for data consistency during concurrent sessions.
   - We used `pytest-django` or `pytest-flask` to test database interactions.
 
+## Test Plan (Found in tests.py | can be run by navigating to cd backend and entering python manage.py test |)
+Model Testing: We tested the functionality and integrity of the models in the application.
+
+  - We validated the creation of SudokuGames and Cell objects, ensuring that attributes like difficulty, size, solution, and pre-filled status are correctly
+    stored in the database.
+  - We ensured that each model interacts properly with the database, confirming the correct creation and storage of game data and cells.
+  - We used Django’s built-in TestCase class to run these tests and verify model behavior.
+  - View Testing: We tested the proper behavior of the views and their responses to different user inputs.
+
+  - We validated the new_game and is_correct views, ensuring that the correct status codes are returned based on the request parameters.
+  - We tested if the views properly handle requests from the frontend, such as starting a new game and checking if a solution is correct.
+  - We used Django’s test client to simulate HTTP requests and check the responses returned from these views.
+  - URL Routing Testing: We validated the proper resolution of URLs to their respective views.
+
+  - In addition, in views.py, the index function actively displays each sessions puzzle, cell values, and history on a backend page. As a player makes moves on        the frontend, you can refresh the backend page to check if the values are being updated correctly.
+
+We confirmed that the URLs for the new_game and is_correct views correctly map to the intended view functions.
+We used Django’s reverse and resolve functions to ensure that each URL is connected to the correct view handler.
 ---
 
 ## Individual Contributions
