@@ -202,6 +202,24 @@ def clearNotes():
     else:
         return jsonify({"error": response.json().get("error", "Failed to clear notes")}, response.status_code)
 
+#Jan
+@app.route('/clearCellNotes', methods=['POST'])
+def clear_cell_notes():
+    data = request.json
+    session_id = data['session_id']
+    row = data['row']
+    column = data['column']
+
+    # Logic to clear notes for the specific cell
+    success = requests.post(
+        f"{BACKEND_URL}/clear_notes/",
+        json={"session_id": session_id, "row": row, "column": column},
+    )
+
+    if success.ok:
+        return jsonify({"success": True, "message": "Notes cleared for the cell."})
+    else:
+        return jsonify({"error": success.json().get("error", "Failed to clear notes")}, success.status_code)
 
 
 #Mark

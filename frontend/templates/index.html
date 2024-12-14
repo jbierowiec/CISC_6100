@@ -138,7 +138,7 @@
             document.getElementById("puzzleSize").value
           );
           const gridSize = document.getElementById("puzzleSize").value; // Get the grid size dynamically
-          const value = prompt(`Enter a note value (1-${gridSize}):`); 
+          const value = prompt(`Enter a note value (1-${gridSize}):`);
           if (value && !isNaN(value) && value >= 1 && value <= puzzleSize) {
             setNote(row, col, parseInt(value));
           } else {
@@ -712,6 +712,10 @@
       // Function to select a number from the number buttons and input it into a cell
       async function selectNumber(num) {
         if (selectedCell) {
+          // Clear notes for the selected cell
+          const row = parseInt(selectedCell.dataset.row);
+          const col = parseInt(selectedCell.dataset.col);
+
           // Find the input element within the selected cell container
           const inputElement = selectedCell.querySelector("input");
 
@@ -723,6 +727,17 @@
 
           userRow = selectedCell.dataset.row;
           userCol = selectedCell.dataset.col;
+
+          // Clear notes in the backend
+          const sessionId = localStorage.getItem("session_id");
+          await fetch("/clearCellNotes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session_id: sessionId, row, column: col }),
+          });
+
+          // Clear notes in the frontend
+          updateNotes(row, col, []); // Pass an empty array to clear notes
 
           // Get the existing session_id from localStorage
           const existingSessionId = localStorage.getItem("session_id");
