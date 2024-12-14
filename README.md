@@ -61,7 +61,7 @@ Here are our story board of how we envisioned for the Sudoku game to look like, 
   - **History**: This includes information about a session, a value that is entered into an empty cell, previous values entered into previously entered cells, a timestamp of when moves are made, as well as a flas that determines if a move made by the user is correct or not.
   - **Notes**: This allows the user to enter multiple values into any given empty cell in such a way that the value is smaller than the rest and it can be cleared. 
 
-![Database Schema](diagrams/Database_Schema_by_Mark.png)
+![Database Schema](diagrams/Database_Schema_by_Mark.jpg)
 
 ## Features
 
