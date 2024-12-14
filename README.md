@@ -220,13 +220,14 @@ We used Django’s reverse and resolve functions to ensure that each URL is conn
     - Altered functions along with Jonathan that were originally created by Jan.
     - Implemented the get game, get current puzzle, new session, new game, get history, update cell, and undo requests. 
   - Jan: 
-    - Did most work primarily in the `index.html` file, `styles.css` file, and `app.py` file all located under the `frontend` directory.
+    - Did most work primarily in the `index.html` file, `styles.css` file, and `app.py` file all located under the `frontend` directory, as well as the `test.py` file located under the `backend` directory.
     - Initialized the project creating the GitHub repository, deciding on the Flask & Django framework.
-    - Created the original database `games.json` file which was moved to the `past_github_upload` directory.
+    - Created the original database `games.json` file which was moved to the `past_github_upload` directory, for backup purposes.
     - Created and implemented the remaining timer functionality relating to pausing the game, stoping and resuming.
-    - Implemented the features on most of the game, such as the mistake counter, fixing a cell to only have one value, dispalying the lose game screen, as well as validate board function based on user inputs.
-    - Implemented the select number buttons, get new game function, check solution function, undo, get hint, get specific hint, and update grid, functions which were added to by Mark & Jonathan during the refactoring phase.
-    - Implemented the UI using CSS as well as 
+    - Implemented the features on most of the game, such as the mistake counter, fixing a cell to only have one value, dispalying the lose game screen, a win game screen, as well as validate board function based on user inputs.
+    - Implemented the select number buttons, get new game, select number, check solution, undo, get hint, get specific hint, note, update note, and update grid functions, which were also added to by Mark & Jonathan during the refactoring phase.
+    - Implemented the UI using CSS as well as made sure the game was relatively responsive and the UI components worked properly
+    - Implemented the `test.py` file in order to validate things like creating a Sudoku Game or simulating HTTP requests.
   - Jonathan: 
     - Did most work primarily in the `index.html` file, `app.py`, `views.py`, files all located under the `frontend` & `backend` directories.
     - Created and debugged notes functionality, including setting, clearing, and displaying notes. 
