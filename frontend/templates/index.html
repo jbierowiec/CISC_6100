@@ -1088,8 +1088,27 @@
           cells.forEach((cell) => {
             //cell.style.backgroundColor = "#ccc"; // Restore cell background
             //cell.style.color = ""; // Restore cell text color
-            cell.style.filter = ""; // Remove blur
-            cell.disabled = cell.dataset.pre_filled === "true"; // Disable pre-filled cells
+            //cell.style.filter = ""; // Remove blur
+            //cell.disabled = cell.dataset.pre_filled === "true"; // Disable pre-filled cells
+
+            const isPreFilled = cell.dataset.preFilled === "true";
+
+            if (isPreFilled) {
+              // Reapply pre-filled cell styles
+              cell.style.backgroundColor = "#e2e8f0"; // Light blue background
+              cell.style.color = "blue"; // Blue text
+              cell.style.fontWeight = "bold"; // Bold font
+              cell.disabled = true; // Pre-filled cells remain disabled
+            } else {
+              // Restore user-input cell styles
+              cell.style.backgroundColor = "#fff"; // White background
+              cell.style.color = "#000"; // Black text
+              cell.style.fontWeight = "normal"; // Normal font
+              cell.disabled = false; // Enable user-input cells
+            }
+
+            // Remove blur effect
+            cell.style.filter = "";
           });
 
           // Enable all buttons except the pause button
