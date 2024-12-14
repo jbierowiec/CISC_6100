@@ -26,10 +26,18 @@ h1 {
 /* Bottom controls container for inline layout */
 .bottom-controls {
   display: flex;
-  align-items: center;
-  gap: 15px;
-  margin-top: 20px;
-  margin-bottom: 100px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, auto);
+  gap: 10px 30px;
+  justify-content: space-evenly;
+  justify-items: center;
+  padding: 20px;
+  width: 500px;
+  box-sizing: border-box;
+ }
+
+.bottom-controls button {
+  margin-bottom: 5px;
 }
 
 /* Timer styling */
@@ -123,7 +131,6 @@ body.dark-mode button:nth-of-type(6) {
   background-color: #c53030;
   color: #ddd;
 }
-
 
 /* Grid styling */
 #sudoku-grid {
