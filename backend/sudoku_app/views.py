@@ -121,22 +121,6 @@ def new_session(request):
     else:
         return JsonResponse({"error": "No puzzle available"})
     
-""" @csrf_exempt
-# Jan 
-# Function to check the solution
-def check_solution(request):
-    if request.method == "POST":
-        user_solution = json.loads(request.body).get("solution")
-        # Ensure both the user's solution and backend solution are in the same format
-        expected_solution = current_puzzle.solution
-
-        # Check if user solution matches the expected solution
-        if user_solution == expected_solution:
-            return JsonResponse({"status": "correct"})
-        else:
-            return JsonResponse({"status": "incorrect"})
-    return JsonResponse({"status": "error"}) """
-
 # Mark
 @csrf_exempt
 def new_game(request):
@@ -406,6 +390,7 @@ def get_notes(request):
     except Cell.DoesNotExist:
         return JsonResponse({"error": "Cell not found"}, status=404)
 
+#Jonathan
 @csrf_exempt
 def clear_notes(request):
     try:

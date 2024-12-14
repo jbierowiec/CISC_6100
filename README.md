@@ -160,3 +160,7 @@ To start the backend and frontend servers, follow these steps:
 - Home page where the user enters their name and also clicks on a size and difficulty. They should then be redirected to the game page (don't just have one game page with all the buttons and user choices there)
 - Generate New Game button reloads the Backend to include that specifc game so that the Check Solution Button will work along with all other buttons
 - The HTML file is currently 700 lines long with the combination of HTML and JavaScript on the file, for better file structure, it would be better to create a separate JavaScript file containing the functionality and separate directory for the index and game pages when both pages are implemented
+
+## Individual Contributions
+- We all tweaked most parts of the code at some point, but here is what we were each primarily responsible for\
+-Jonathan: Created and debugged notes functionality, including setting, clearing, and displaying notes. Implemeted backend route /isCorrect to verify if a move is correct when it is made. Began work for the timer. Reworked the check solution and hint functions in the front and backend. Added a route to the backend to clear history data for a cell. Began work on the undo/undo untill correct, though I later pivoted away from that and it was reworked/added to by Mark. 
