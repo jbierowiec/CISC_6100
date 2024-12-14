@@ -61,7 +61,7 @@ Here are our story board of how we envisioned for the Sudoku game to look like, 
   - **History**: This includes information about a session, a value that is entered into an empty cell, previous values entered into previously entered cells, a timestamp of when moves are made, as well as a flas that determines if a move made by the user is correct or not.
   - **Notes**: This allows the user to enter multiple values into any given empty cell in such a way that the value is smaller than the rest and it can be cleared. 
 
-![Database Schema](diagrams/Database_Schema.jpg)
+![Database Schema](diagrams/Database_Schema_by_Mark.png)
 
 ## Features
 
@@ -132,6 +132,10 @@ Here are our story board of how we envisioned for the Sudoku game to look like, 
 ### Use Case Diagram
 
 ![General Use Case Diagram](diagrams/High%20Level%20Use%20case%20diagram.png)
+
+### Activity Diagram
+
+![Undo Until Correct Activity Diagram](diagrams/Activity%diagram%UndoTillCorrect.pdf)
 
 ---
 
@@ -219,7 +223,7 @@ We used Django’s reverse and resolve functions to ensure that each URL is conn
     - Implemented the entities that are stored in the `models.py` file. 
     - Altered functions along with Jonathan that were originally created by Jan.
     - Implemented the get game, get current puzzle, new session, new game, get history, update cell, and undo requests.
-    - Created the database schema diagram as well as the sequence diagram for the undo function in the `diagrams` directory.
+    - Created the database schema diagram as well as the activity diagram for the undo function in the `diagrams` directory.
   - Jan: 
     - Did most work primarily in the `index.html` file, `styles.css` file, and `app.py` file all located under the `frontend` directory, as well as the `test.py` file located under the `backend` directory.
     - Initialized the project creating the GitHub repository, deciding on the Flask & Django framework.
