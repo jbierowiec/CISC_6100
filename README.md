@@ -218,7 +218,8 @@ We used Django’s reverse and resolve functions to ensure that each URL is conn
     - Transfered the the data to a `db.sqlite3` database. 
     - Implemented the entities that are stored in the `models.py` file. 
     - Altered functions along with Jonathan that were originally created by Jan.
-    - Implemented the get game, get current puzzle, new session, new game, get history, update cell, and undo requests. 
+    - Implemented the get game, get current puzzle, new session, new game, get history, update cell, and undo requests.
+    - Created the database schema diagram as well as the sequence diagram for the undo function in the `diagrams` directory.
   - Jan: 
     - Did most work primarily in the `index.html` file, `styles.css` file, and `app.py` file all located under the `frontend` directory, as well as the `test.py` file located under the `backend` directory.
     - Initialized the project creating the GitHub repository, deciding on the Flask & Django framework.
@@ -228,6 +229,7 @@ We used Django’s reverse and resolve functions to ensure that each URL is conn
     - Implemented the select number buttons, get new game, select number, check solution, undo, get hint, get specific hint, note, update note, and update grid functions, which were also added to by Mark & Jonathan during the refactoring phase.
     - Implemented the UI using CSS as well as made sure the game was relatively responsive and the UI components worked properly
     - Implemented the `test.py` file in order to validate things like creating a Sudoku Game or simulating HTTP requests.
+    - Created most diagrams listed in the `diagrams` directory.
   - Jonathan: 
     - Did most work primarily in the `index.html` file, `app.py`, `views.py`, files all located under the `frontend` & `backend` directories.
     - Created and debugged notes functionality, including setting, clearing, and displaying notes. 
