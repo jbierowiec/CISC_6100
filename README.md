@@ -125,15 +125,13 @@ Here are our story board of how we envisioned for the Sudoku game to look like, 
 - If the user makes three such mistakes in the game, a message box will come up notifying the user that they have lost the game, displaying a 10 second timer that decerements down. Once complete, a new game is loaded onto the scree.
 - If the user has incorreclty inputted values in the game, and they click on the "Check Solution" button, they will be notified that their inputed are incorrect. 
 
-### Validating a Value
-
-![Validating a Value](diagrams/Validating%20a%20Value.png)
-
 ### Use Case Diagram
 
 ![General Use Case Diagram](diagrams/High%20Level%20Use%20case%20diagram.png)
 
 ### Activity Diagram
+
+![Validating a Value Activity Diagram](diagrams/Validating%20a%20Value.png)
 
 ![Undo Until Correct Activity Diagram](diagrams/Activity%diagram%UndoTillCorrect.png)
 
