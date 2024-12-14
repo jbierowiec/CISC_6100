@@ -82,7 +82,7 @@ def new_session(request):
     current_puzzle = random.choice(games)
     
     existing_id = request.GET.get('session_id', 0) # Pass session_id from the frontend, default to 0 if not
-    
+
     # Check for an existing session and delete it
     if existing_id != 0:
         existing_sessions = Sessions.objects.filter(id=existing_id)
@@ -452,7 +452,7 @@ def undo(request):
     except Sessions.DoesNotExist:
         return JsonResponse({"error": "Session not found."}, status=404)
 
-# Jonathan
+# Jonathan / Mark
 @csrf_exempt
 def undo_till_correct(request):
     try:

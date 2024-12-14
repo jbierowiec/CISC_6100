@@ -49,10 +49,4 @@ class History(models.Model):
             f"changed from {self.previous_value} to {self.new_value} at {self.timestamp}"
         )
 
-# Mark
-class Note(models.Model):
-    cell = models.ForeignKey(Cell, on_delete=models.CASCADE, related_name = "note")
-    value = models.JSONField()
 
-    def __str__(self):
-        return f"Notes for Cell ({self.cell.row}, {self.cell.column}) in Session {self.cell.session.id}"
