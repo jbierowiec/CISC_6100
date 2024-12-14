@@ -133,11 +133,11 @@ Here are our story board of how we envisioned for the Sudoku game to look like, 
 
 ![Validating a Value Activity Diagram](diagrams/Validating%20a%20Value.png)
 
-![Undo Until Correct Activity Diagram](diagrams/Activity%diagram%UndoTillCorrect.png)
+![Undo Until Correct Activity Diagram](diagrams/Activity%20diagram%20UndoTillCorrect.png)
 
 ### Sequence Diagram
 
-![Undo Sequence Diagram](diagrams/Sequence%diagram%Undo%By%Mark.jpg)
+![Undo Sequence Diagram](diagrams/Sequence%20diagram%20Undo%20By%20Mark.jpg)
 
 ---
 
