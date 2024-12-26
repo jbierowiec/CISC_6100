@@ -1,4 +1,4 @@
-# SWE Sudoku Project
+# CISC 6100 Software Engineering Sudoku Project
 
 This repository contains the source code for the Software Engineering Sudoku Game Project. The application is built using Flask for the frontend and Django for the backend, with the website designed to be dynamic and responsive using HTML and CSS, ensuring compatibility with both personal computers and mobile devices. The database that stores all the sudoku games is a SQLite database.
 
