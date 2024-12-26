@@ -280,7 +280,7 @@ We used Django’s reverse and resolve functions to ensure that each URL is conn
 
 
 ## Description of Implementations
-- Undo Until Correct Buton (take away all wrong numbers until it reaches the cells with only correct and preset values)
+- Undo Until Correct Button (takes away all wrong number inputs until it reaches the cells with only correct number inputs and preset values)
 - Generate Random Hint Button (user clicks the button at anytime, and a empty cell is filled with a value from the solutions part of the JSON file)
 - Generate Specific Hint Button (user clicks on an empty cell, then the user clicks on the Get Specific Hint Button and a value is filled in from the solutions part of the JSON file)
 - Set Note Button (user clicks on this button, can fill a cell with 4 values for 4x4 sudoku or 9 values for 9x9 sudoku. Those values should all be within a single cell and should have a 2x2 layout for 4x4 sudoku or a 3x3 layout for 9x9 sudoku. If a user inputs a value in a cell that is in the same row or column of the noted cell, then the noted cell should pop the value that was noted, since the value is now used in a different cell. The values inside of the note cell should have those values in a cell in a small font)
