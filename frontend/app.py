@@ -12,7 +12,8 @@ HISTORY = []  # Stack to track move history
 current_board = []  # 2D array to represent the current Sudoku board
 leaderboard = []
 
-BACKEND_URL = "http://127.0.0.1:8000/sudoku"
+#BACKEND_URL = "http://127.0.0.1:8000/sudoku"
+BACKEND_URL = "https://sudokubros.up.railway.app/sudoku"
 
 # Jonathan
 # HISTORY will be a list of moves with this data
