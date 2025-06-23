@@ -1,12 +1,11 @@
 #!/bin/bash
-# Start both Flask and Django servers in the background
+# Start both Flask and Django servers properly
 
-# Start Flask (now using port 5050)
+# Start Flask using gunicorn on Railway's required port 8080
 cd frontend
-export FLASK_APP=app.py
-flask run --host=0.0.0.0 --port=6050 &
+gunicorn app:app --bind 0.0.0.0:8080 &
 cd ..
 
-# Start Django
+# Optional: Start Django if needed on another port
 cd backend
-python manage.py runserver 0.0.0.0:8000
+python manage.py runserver 0.0.0.0:8001
