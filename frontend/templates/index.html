@@ -12,7 +12,12 @@
   </head>
 
   <body>
-    <h1>Sudoku Game</h1>
+    <!--<h1>Sudoku Game</h1>-->
+    <h1>{{ name }}'s Sudoku Game</h1>
+
+    <form action="/" method="GET">
+      <button type="submit">Go Back</button>
+    </form>
 
     <!-- Top controls: Timer, Difficulty, and Dark/Light Mode -->
     <div class="top-controls">
@@ -870,12 +875,34 @@
           }
         });
 
+        /*
         if (allCorrect) {
           stopTimer(); // Stop the timer
           const congratsMessage = document.getElementById("congrats-message");
           congratsMessage.style.display = "block";
 
           disableBoard(); // Disable the board
+        }
+        */
+
+        if (allCorrect) {
+          stopTimer();
+
+          const difficulty = document.getElementById("difficulty").value;
+          const size = document.getElementById("puzzleSize").value;
+          const sessionId = localStorage.getItem("session_id");
+
+          await fetch("/complete_game", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+              difficulty: difficulty,
+              size: size,
+              puzzle_id: sessionId,
+            }),
+          });
+
+          window.location.href = "/leaderboard";
         }
       }
 
@@ -896,7 +923,6 @@
       // Function to load a new game on the screen
       async function newGame() {
         const difficulty = document.getElementById("difficulty").value;
-
         const puzzleSize = document.getElementById("puzzleSize").value; // Get the selected puzzle size
 
         // Get the existing session_id from localStorage if it exists
@@ -907,13 +933,15 @@
           `/new_game?difficulty=${difficulty}&size=${puzzleSize}&session_id=${existingSessionId}`
         );
 
-        const { cells, session_id } = await response.json();
+        //const { cells, session_id } = await response.json();
+        const data = await response.json(); // Only parse JSON once
+        const { cells, session_id } = data;
 
         // Store the new session_id in localStorage for future use
         localStorage.setItem("session_id", session_id);
 
-        const { puzzle } = await response.json();
-        console.log(session_id);
+        //const { puzzle } = await response.json();
+        //console.log(session_id);
         updateGrid(cells);
 
         // Reset the mistake counter

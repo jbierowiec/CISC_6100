@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Leaderboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      background-color: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 800px;
+    }
+
+    h1 {
+      font-size: 32px;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      font-size: 16px;
+    }
+
+    table th {
+      background-color: #33b5e5;
+      color: white;
+    }
+
+    table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    table tr:hover {
+      background-color: #e0f4ff;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      background-color: #33b5e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background-color: #1c98d3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Leaderboard</h1>
+    <table>
+      <tr>
+        <th>Name</th>
+        <th>Time</th>
+        <th>Size</th>
+        <th>Difficulty</th>
+        <th>Puzzle ID</th>
+      </tr>
+      {% for entry in leaderboard %}
+      <tr>
+        <td>{{ entry.name }}</td>
+        <td>{{ entry.time }}</td>
+        <td>{{ entry.size }}</td>
+        <td>{{ entry.difficulty }}</td>
+        <td>{{ entry.puzzle_id }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    <a href="/" class="btn">Back to Welcome</a>
+  </div>
+</body>
+</html>

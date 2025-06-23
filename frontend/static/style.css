@@ -154,15 +154,23 @@ body.dark-mode button:nth-of-type(3) {
   color: #ddd;
 }
 body.dark-mode button:nth-of-type(4) {
-  background-color: #2b6cb0;
+  background-color: #ad9e16;
   color: #ddd;
 }
 body.dark-mode button:nth-of-type(5) {
-  background-color: #2f855a;
+  background-color: #2b6cb0;
   color: #ddd;
 }
 body.dark-mode button:nth-of-type(6) {
+  background-color: #2f855a;
+  color: #ddd;
+}
+body.dark-mode button:nth-of-type(7) {
   background-color: #c53030;
+  color: #ddd;
+}
+body.dark-mode button:nth-of-type(8) {
+  background-color: #ad9e16;
   color: #ddd;
 }
 

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Welcome</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    .container h1 {
+      font-size: 32px;
+      margin-bottom: 30px; /* spacing between title and box */
+    }
+
+    .welcome-box {
+      background-color: white;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      display: inline-block;
+    }
+
+    .welcome-box p {
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    .welcome-form input[type="text"] {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      margin-right: 10px;
+      width: 200px;
+    }
+
+    .welcome-form button {
+      padding: 10px 20px;
+      background-color: #33b5e5;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .welcome-form button:hover {
+      background-color: #1c98d3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to our Sudoku Game!</h1>
+    <div class="welcome-box">
+      <p>Please enter your name to begin:</p>
+      <form action="/start_game" method="POST" class="welcome-form">
+        <input type="text" name="player_name" required placeholder="Your Name" />
+        <button type="submit">Start Game</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

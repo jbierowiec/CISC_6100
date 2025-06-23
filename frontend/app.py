@@ -1,12 +1,16 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import requests
 import json, random
+import time
+import os
 
 app = Flask(__name__)
+app.secret_key = '9f8c0d1a2b3456f7e8b90c1d2a3e4f5b'
 
 # This is where we store the current board and history of moves
 HISTORY = []  # Stack to track move history
 current_board = []  # 2D array to represent the current Sudoku board
+leaderboard = []
 
 BACKEND_URL = "http://127.0.0.1:8000/sudoku"
 
@@ -23,9 +27,49 @@ BACKEND_URL = "http://127.0.0.1:8000/sudoku"
 #        return f"Move(row={self.row}, col={self.col}, value={self.value}, correct={self.correct})"
 
 # Jan
+'''
 @app.route('/')
 def index():
     return render_template('index.html')
+'''
+
+@app.route('/')
+def index():
+    return render_template('welcome.html')
+
+@app.route('/start_game', methods=["POST"])
+def start_game():
+    session['player_name'] = request.form["player_name"]
+    session['start_time'] = time.time()
+    return redirect(url_for('game'))
+
+@app.route('/game')
+def game():
+    name = session.get("player_name", "Player")
+    return render_template("index.html", name=name)
+
+@app.route('/complete_game', methods=["POST"])
+def complete_game():
+    end_time = time.time()
+    duration = int(end_time - session.get("start_time", end_time))
+    player_name = session.get("player_name", "Unknown")
+    size = request.form.get("size", "9x9")
+    difficulty = request.form.get("difficulty", "Medium")
+    puzzle_id = request.form.get("puzzle_id", "N/A")
+
+    leaderboard.append({
+        "name": player_name,
+        "time": f"{duration} seconds",
+        "size": size,
+        "difficulty": difficulty,
+        "puzzle_id": puzzle_id
+    })
+
+    return redirect(url_for('show_leaderboard'))
+
+@app.route('/leaderboard')
+def show_leaderboard():
+    return render_template("leaderboard.html", leaderboard=leaderboard)
 
 # Mark
 @app.route('/get_puzzle', methods = ['GET'])
@@ -250,5 +294,11 @@ def undo_till_correct():
     else:
         return jsonify({"error": "Failed to contact backend"}), 500
 
+'''
 if __name__ == '__main__':
     app.run(debug=True)
+'''
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
