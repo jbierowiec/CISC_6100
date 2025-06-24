@@ -27,7 +27,7 @@ SECRET_KEY = "django-insecure-x-0=rm2r&-w%3qb8!yl_m53z@+o2unr$br#re8zdk49)&p0-^n
 DEBUG = True
 
 # ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', os.environ.get('RAILWAY_PUBLIC_DOMAIN', ''), 'sudokubros.up.railway.app']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0', os.environ.get('RAILWAY_PUBLIC_DOMAIN', ''), 'sudokubros.up.railway.app', '*']
 
 
 # Application definition

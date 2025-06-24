@@ -12,9 +12,9 @@ HISTORY = []  # Stack to track move history
 current_board = []  # 2D array to represent the current Sudoku board
 leaderboard = []
 
-#BACKEND_URL = "http://127.0.0.1:8000/sudoku"
+BACKEND_URL = "http://127.0.0.1:8000/sudoku"
 #BACKEND_URL = "https://sudokubros.up.railway.app/sudoku"
-BACKEND_URL = "https://sudokubros.up.railway.app"
+
 
 
 # Jonathan
@@ -92,7 +92,6 @@ def get_session():
     
     new_session= requests.get(f"{BACKEND_URL}/new_session/", params={"session_id": current_session_id}).json()
     return jsonify({"new_session_id": new_session["session_id"]})
-
 
 """ # Jan
 @app.route('/check_solution', methods=['POST'])
