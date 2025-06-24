@@ -4,7 +4,7 @@
 # Start Flask (now using port 5050)
 cd frontend
 export FLASK_APP=app.py
-flask run --host=0.0.0.0 --port=8025 &
+flask run --host=0.0.0.0 --port=8080 &
 cd ..
 
 # Start Django
