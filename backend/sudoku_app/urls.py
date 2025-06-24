@@ -2,10 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('get_session/', views.get_session),
-    path('start_game/', views.start_game),
-    path('save_game_state/', views.save_game_state),
-    path('get_game_state/', views.get_game_state),
     path('', views.index, name='home'),  # This is the root URL
     path('get_puzzle/', views.get_current_puzzle, name="get_puzzle"),
     path('new_game/', views.new_game, name="new_game"),
