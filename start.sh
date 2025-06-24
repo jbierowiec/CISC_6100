@@ -1,13 +1,10 @@
 #!/bin/bash
+# Start both Flask and Django servers in the background
 
-# Kill existing processes using these ports
-lsof -ti tcp:8060 | xargs kill -9 2>/dev/null
-lsof -ti tcp:8000 | xargs kill -9 2>/dev/null
-
-# Start Flask frontend on port 8060 in background
+# Start Flask (now using port 5050)
 cd frontend
 export FLASK_APP=app.py
-flask run --host=0.0.0.0 --port=8060 &
+flask run --host=0.0.0.0 --port=8080 &
 cd ..
 
 # Start Django
