@@ -13,13 +13,12 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 90%; /* Adjust the width based on screen size */
-  max-width: 1200px; /* Prevent it from growing too large */
+  width: 90%;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
 }
-
 
 /* Title styling */
 h1 {
@@ -36,21 +35,24 @@ h1 {
   margin-bottom: 20px;
 }
 
+.top-controls form {
+  margin-right: 12px;
+}
+
 .bottom-controls {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* 4 buttons per row */
-  gap: 10px; /* Spacing between buttons */
-  justify-content: center; /* Center the grid */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  justify-content: center;
   padding: 20px;
-  max-width: 75%; /* Ensure it spans the available width */
-  box-sizing: border-box; /* Include padding in width calculation */
+  max-width: 75%;
+  box-sizing: border-box;
 }
 
 .bottom-controls button {
-  width: 100%; /* Make buttons span their grid cell */
-  padding: 10px; /* Adjust padding for button size */
+  width: 100%;
+  padding: 10px;
 }
-
 
 /* Timer styling */
 #timer {
@@ -85,9 +87,9 @@ button:hover {
 }
 
 button:disabled {
-  background-color: #ccc; 
-  color: #666; 
-  cursor: not-allowed; 
+  background-color: #ccc;
+  color: #666;
+  cursor: not-allowed;
 }
 
 /* Button colors */
@@ -102,39 +104,39 @@ button:nth-of-type(1) {
 }
 
 button:nth-of-type(2) {
-  background-color: #4ade80;
-  color: #fff;
-} 
-
-button:nth-of-type(3) {
-  background-color: #f87171;
-  color: #fff;
-} 
-
-button:nth-of-type(4) {
-  background-color: #e1cd1e;
-  color: #fff;
-} 
-
-button:nth-of-type(5) {
   background-color: #38bdf8;
   color: #fff;
-} 
+}
 
-button:nth-of-type(6) {
+button:nth-of-type(3) {
   background-color: #4ade80;
   color: #fff;
-} 
+}
 
-button:nth-of-type(7) {
+button:nth-of-type(4) {
+  background-color: #4ade80;
+  color: #fff;
+}
+
+button:nth-of-type(5) {
   background-color: #f87171;
   color: #fff;
-} 
+}
+
+button:nth-of-type(6) {
+  background-color: #f87171;
+  color: #fff;
+}
+
+button:nth-of-type(7) {
+  background-color: #e1cd1e;
+  color: #fff;
+}
 
 button:nth-of-type(8) {
   background-color: #e1cd1e;
   color: #fff;
-} 
+}
 
 /* Dark mode button colors */
 body.dark-mode button#theme-toggle {
@@ -146,27 +148,27 @@ body.dark-mode button:nth-of-type(1) {
   color: #ddd;
 }
 body.dark-mode button:nth-of-type(2) {
-  background-color: #2f855a;
-  color: #ddd;
-}
-body.dark-mode button:nth-of-type(3) {
-  background-color: #c53030;
-  color: #ddd;
-}
-body.dark-mode button:nth-of-type(4) {
-  background-color: #ad9e16;
-  color: #ddd;
-}
-body.dark-mode button:nth-of-type(5) {
   background-color: #2b6cb0;
   color: #ddd;
 }
-body.dark-mode button:nth-of-type(6) {
+body.dark-mode button:nth-of-type(3) {
   background-color: #2f855a;
   color: #ddd;
 }
-body.dark-mode button:nth-of-type(7) {
+body.dark-mode button:nth-of-type(4) {
+  background-color: #2f855a;
+  color: #ddd;
+}
+body.dark-mode button:nth-of-type(5) {
   background-color: #c53030;
+  color: #ddd;
+}
+body.dark-mode button:nth-of-type(6) {
+  background-color: #c53030;
+  color: #ddd;
+}
+body.dark-mode button:nth-of-type(7) {
+  background-color: #ad9e16;
   color: #ddd;
 }
 body.dark-mode button:nth-of-type(8) {
@@ -196,21 +198,21 @@ body.dark-mode button:nth-of-type(8) {
 }
 
 .cell.checker-light {
-  background-color: #f0f0f0; /* Light checker color */
+  background-color: #f0f0f0;
 }
 
 .cell.checker-dark {
-  background-color: #d0d0d0; /* Dark checker color */
+  background-color: #d0d0d0;
 }
 
 .cell.sub-grid-border.light-mode {
-  border-width: 2px; /* Thicker borders for sub-grid separators */
-  border-color: #000; /* Color for sub-grid separators */
+  border-width: 2px;
+  border-color: #000;
 }
 
 .cell.sub-grid-border.dark-mode {
-  border-width: 2px; /* Thicker borders for sub-grid separators */
-  border-color: red; /* Color for sub-grid separators */
+  border-width: 2px;
+  border-color: red;
 }
 
 .cell:disabled {
@@ -289,26 +291,29 @@ body.dark-mode .grid-container .cell {
 
 .number-controls {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 5px;
   margin-bottom: 10px;
 }
 
 .number-controls button {
-  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
   height: 50px;
-  font-size: 1.5em;
-  background-color: #aad6f2; /* Green color */
-  color: #fff;
+  font-size: 1.2rem;
+  margin: 2px;
   border: 1px solid #ccc;
-  text-align: center;
   border-radius: 5px;
+  background-color: #aad6f2;
   cursor: pointer;
-  transition: background-color 0.3s;
-  border: 1px solid #ccc;
+  transition: background-color 0.2s ease;
 }
 
 .number-controls button:hover {
-  background-color: #9fd1ef; /* Darker green on hover */
+  background-color: #9fd1ef;
 }
 
 body.dark-mode .number-controls button {
@@ -327,74 +332,124 @@ body.dark-mode .number-controls button:hover {
   width: 100%;
   height: 100%;
   display: grid;
-  pointer-events: auto; /* Prevent accidental clicks when Set Note is off */
+  pointer-events: auto;
 }
 
 .note {
   display: flex;
   justify-content: center;
   align-items: center;
-  pointer-events: auto; /* Allow clicking on notes */
+  pointer-events: auto;
+}
+
+.loss-popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fff0f0;
+  border: 2px solid #d32f2f;
+  padding: 30px 40px;
+  text-align: center;
+  border-radius: 12px;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  animation: fadeInScale 0.4s ease-out;
+}
+
+.loss-title {
+  color: #d32f2f;
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.loss-popup p {
+  font-size: 18px;
+  color: #333;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 
 @media screen and (max-width: 1024px) {
   .number-controls button {
-    height: 50px; 
+    height: 50px;
     width: 50px;
-    font-size: 1.5em; 
+    font-size: 1.5em;
   }
 }
 
 @media screen and (max-width: 768px) {
+  h1 {
+    text-align: center;
+  }
+
   .top-controls {
     flex-direction: column;
     align-items: center;
   }
 
-  #timer, #difficulty, #puzzleSize, #theme-toggle {
-    min-width: 100%; /* Stack elements vertically */
+  #timer,
+  #difficulty,
+  #puzzleSize,
+  #theme-toggle {
+    min-width: 100%;
     margin-bottom: 10px;
   }
 
   .number-controls button {
-    height: 40px; 
+    height: 40px;
     width: 40px;
-    font-size: 1.2em; 
+    font-size: 1.2em;
+  }
+
+  .bottom-controls {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media screen and (max-width: 480px) {
   .bottom-controls button,
   .number-controls button {
-    font-size: 0.9rem; /* Adjust button text size */
+    font-size: 0.9rem;
     padding: 8px;
   }
 
   .cell {
-    width: 25px; /* Smaller grid cells */
+    width: 25px;
     height: 25px;
     font-size: 0.8rem;
   }
 
   .number-controls button {
-    height: 40px; 
+    height: 40px;
     width: 40px;
-    font-size: 1.2em; 
+    font-size: 1.2em;
   }
 }
 
 @media screen and (max-width: 600px) {
   .number-controls button {
-    height: 30px; 
+    height: 30px;
     width: 30px;
-    font-size: 1em; 
+    font-size: 1em;
   }
 }
 
 @media screen and (max-width: 400px) {
   .number-controls button {
-    height: 15px; 
-    width: 15px;
-    font-size: 0.5em; 
+    height: 30px;
+    width: 30px;
+    font-size: 1em;
   }
 }

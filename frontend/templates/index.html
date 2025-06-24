@@ -15,12 +15,11 @@
     <!--<h1>Sudoku Game</h1>-->
     <h1>{{ name }}'s Sudoku Game</h1>
 
-    <form action="/" method="GET">
-      <button type="submit">Go Back</button>
-    </form>
-
     <!-- Top controls: Timer, Difficulty, and Dark/Light Mode -->
     <div class="top-controls">
+      <form action="/" method="GET">
+        <button type="submit">Go Back</button>
+      </form>
       <div id="timer">00:00:00</div>
       <button id="pause-button" onclick="togglePause()">Stop</button>
 
@@ -52,29 +51,16 @@
     <!-- Bottom controls: Check Solution, New Game, Undo, Get Hint -->
     <div class="bottom-controls">
       <button onclick="checkSolution()">Check solution</button>
-      <button onclick="undoMove()">Undo</button>
-      <button onclick="getHint()">Get Specific Hint</button>
-      <button onclick="note()">Set Note</button>
       <button onclick="newGame()">Create new game</button>
-      <button onclick="undoUntilCorrect()">Undo Until Correct</button>
+      <button onclick="getHint()">Get Specific Hint</button>
       <button onclick="getRandomHint()">Get Random Hint</button>
+      <button onclick="undoMove()">Undo</button>
+      <button onclick="undoUntilCorrect()">Undo Until Correct</button>
+      <button onclick="note()">Set Note</button>
       <button onclick="clearNotes()">Clear Note</button>
     </div>
     <!-- Loss message modal -->
-    <div
-      id="loss-message"
-      style="
-        display: none;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: white;
-        border: 2px solid black;
-        padding: 20px;
-        text-align: center;
-      "
-    >
+    <div id="loss-message" class="loss-popup">
       <p>You Lost!</p>
       <p>Retry in <span id="retry-timer">10</span> seconds...</p>
     </div>
@@ -966,7 +952,9 @@
       // Function to give the border colors of the grids & creating a checker pattern
       function updateBorders() {
         const isDarkMode = document.body.classList.contains("dark-mode");
-        const borderColor = isDarkMode ? "rgb(255, 196, 33)" : "black";
+        const borderColor = isDarkMode
+          ? "rgb(243, 245, 240)"
+          : "rgb(158, 159, 163)";
 
         document.querySelectorAll(".cell").forEach((cell) => {
           const row = parseInt(cell.dataset.row);
