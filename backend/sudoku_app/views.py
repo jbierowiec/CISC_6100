@@ -11,6 +11,66 @@ from django.shortcuts import render
 # Global variable to hold the current puzzle
 current_puzzle = None
 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Sessions
+import uuid
+import json
+
+@csrf_exempt
+def get_session(request):
+    if request.method == 'GET':
+        session_id = str(uuid.uuid4())
+        Sessions.objects.create(session_id=session_id)
+        return JsonResponse({'session_id': session_id})
+    return JsonResponse({'error': 'GET method required'}, status=405)
+
+@csrf_exempt
+def start_game(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            session_id = data.get('session_id')
+            size = data.get('size')
+            difficulty = data.get('difficulty')
+
+            session = Sessions.objects.get(session_id=session_id)
+            session.size = size
+            session.difficulty = difficulty
+            session.save()
+            return JsonResponse({'message': 'Game started'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    return JsonResponse({'error': 'POST method required'}, status=405)
+
+@csrf_exempt
+def save_game_state(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            session_id = data.get('session_id')
+            board_state = data.get('board_state')
+            session = Sessions.objects.get(session_id=session_id)
+            session.board_state = json.dumps(board_state)
+            session.save()
+            return JsonResponse({'message': 'Game state saved'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    return JsonResponse({'error': 'POST method required'}, status=405)
+
+@csrf_exempt
+def get_game_state(request):
+    if request.method == 'GET':
+        session_id = request.GET.get('session_id')
+        try:
+            session = Sessions.objects.get(session_id=session_id)
+            board_state = json.loads(session.board_state) if session.board_state else None
+            return JsonResponse({'board_state': board_state})
+        except Sessions.DoesNotExist:
+            return JsonResponse({'error': 'Session not found'}, status=404)
+    return JsonResponse({'error': 'GET method required'}, status=405)
+
+
 # Mark
 @csrf_exempt # to keep for testing purposes
 def index(request):
