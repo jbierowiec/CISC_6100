@@ -164,14 +164,7 @@ To start the backend and frontend servers, follow these steps:
      ```bash
      python app.py
      ```
-
-3. **Alternative Setup**:
-   - In the `past_github_upload` directory, you can run the program directly:
-     ```bash
-     cd past_github_upload
-     python app.py
-     ```
-
+     
 ---
 
 ## Changes Made
